@@ -1,6 +1,11 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 
 class LocationsPage extends StatefulWidget {
+  final String uid;
+
+  LocationsPage({Key key, this.uid}) : super(key: key);
+
   @override
   _LocationsPageState createState() => _LocationsPageState();
 }
@@ -8,9 +13,30 @@ class LocationsPage extends StatefulWidget {
 class _LocationsPageState extends State<LocationsPage> {
   @override
   Widget build(BuildContext context) {
-    final List<String> entries = <String>['A', 'B', 'C'];
-    final List<int> colorCodes = <int>[600, 500, 100];
-    _addLocation() {}
+    final locations = Firestore.instance.collection("users").document(widget.uid).collection("locations");
+    List<String> names = <String>[];
+
+    //get devices
+    locations
+        .getDocuments()
+        .then((QuerySnapshot snapshot) {
+
+      snapshot.documents.forEach((f) =>
+      {
+        print(f.data["name"]),
+        names.add(f.data["name"])
+      });
+
+    });
+
+
+
+
+
+
+    _addLocation() {
+
+    }
 
     return Scaffold(
         appBar: AppBar(
@@ -21,12 +47,12 @@ class _LocationsPageState extends State<LocationsPage> {
             Expanded(
               child: ListView.builder(
                 padding: const EdgeInsets.all(8),
-                itemCount: entries.length,
+                itemCount: names.length,
                 itemBuilder: (BuildContext context, int index) {
                   return Container(
                       height: 50,
-                      color: Colors.amber[colorCodes[index]],
-                      child: Center(child: Text("Entry ${entries[index]}")));
+                      color: Colors.red,
+                      child: Center(child: Text("Entry ${names[index]}")));
                 },
               ),
             ),

@@ -27,7 +27,7 @@ class _LoginPageState extends State<HomePage> {
         case 0:
           if (_signed){
             Navigator.of(context).push(MaterialPageRoute<Null>(builder:  (BuildContext context){
-              return new LocationsPage();
+              return new LocationsPage(uid: userId);
             }));
           } else {
             _showToast(context);
