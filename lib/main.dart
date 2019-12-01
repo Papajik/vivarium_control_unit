@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:preferences/preferences.dart';
 import 'package:vivarium_control_unit/Constants.dart';
 
 import 'home_page.dart';
 
-void main(){
+void main() async {
+  await PrefService.init(prefix: 'pref_');
   runApp(Constants(
     child: MyApp(),
   ));
