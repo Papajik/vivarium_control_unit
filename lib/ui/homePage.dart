@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:vivarium_control_unit/Constants.dart';
-import 'package:vivarium_control_unit/LocationsPage.dart';
+import 'package:vivarium_control_unit/ui/LocationsPage.dart';
+import 'package:vivarium_control_unit/ui/SettingsPage.dart';
 import 'package:vivarium_control_unit/utils/auth.dart';
 import 'package:toast/toast.dart';
 
@@ -16,8 +17,10 @@ class _LoginPageState extends State<HomePage> {
 
   @override
   Widget build(BuildContext context) {
-    _showToast(context) {
-      Toast.show("You need to sign in first", context, duration: Toast.LENGTH_SHORT, gravity: Toast.BOTTOM);
+
+
+    _showLogInWarning(context) {
+      Toast.show(Constants.of(context).signInWarningText, context, duration: Toast.LENGTH_SHORT, gravity: Toast.BOTTOM);
     }
 
 
@@ -30,12 +33,12 @@ class _LoginPageState extends State<HomePage> {
               return new LocationsPage(uid: userId);
             }));
           } else {
-            _showToast(context);
+            _showLogInWarning(context);
           }
           break;
         case 1:
           Navigator.of(context).push(MaterialPageRoute<Null>(builder:  (BuildContext context){
-            return new LocationsPage();
+            return new SettingsPage();
           }));
           break;
       }

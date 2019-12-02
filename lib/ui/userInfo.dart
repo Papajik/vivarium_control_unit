@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:vivarium_control_unit/home_page.dart';
+import 'package:vivarium_control_unit/ui/homePage.dart';
 import 'package:vivarium_control_unit/utils/auth.dart';
 
 class UserInfo extends StatelessWidget {

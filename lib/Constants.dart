@@ -7,10 +7,10 @@ class Constants extends InheritedWidget {
 
   final String logoutText = "Log out";
   final String notSignedText = "Sign in with google";
+  final String signInWarningText = "You need to sign in first";
 
   @override
   bool updateShouldNotify(InheritedWidget oldWidget) {
-    // TODO: implement updateShouldNotify
     return false;
   }
 

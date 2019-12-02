@@ -1,8 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:preferences/preferences.dart';
 import 'package:vivarium_control_unit/Constants.dart';
-
-import 'home_page.dart';
+import 'package:vivarium_control_unit/ui/homePage.dart';
 
 void main() async {
   await PrefService.init(prefix: 'pref_');

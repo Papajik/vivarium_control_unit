@@ -13,8 +13,12 @@ class LocationsPage extends StatefulWidget {
 class _LocationsPageState extends State<LocationsPage> {
   @override
   Widget build(BuildContext context) {
-    _addLocation() {
 
+    _addLocation() {
+      Navigator.of(context)
+          .push(MaterialPageRoute<Null>(builder: (BuildContext context) {
+        return new LocationsPage();
+      }));
     }
 
     return Scaffold(
@@ -38,5 +42,3 @@ class _LocationsPageState extends State<LocationsPage> {
         ));
   }
 }
-
-
