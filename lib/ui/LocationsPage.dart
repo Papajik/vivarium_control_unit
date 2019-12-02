@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:vivarium_control_unit/locationList.dart';
+import 'package:vivarium_control_unit/ui/locationList.dart';
 
 class LocationsPage extends StatefulWidget {
   final String uid;

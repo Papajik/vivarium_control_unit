@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:vivarium_control_unit/home_page.dart';
-import 'package:vivarium_control_unit/sign_in.dart';
+import 'package:vivarium_control_unit/utils/auth.dart';
 
-class FirstScreen extends StatelessWidget {
+class UserInfo extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
