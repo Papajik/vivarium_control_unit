@@ -1,5 +1,5 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:vivarium_control_unit/locationList.dart';
 
 class LocationsPage extends StatefulWidget {
   final String uid;
@@ -13,27 +13,6 @@ class LocationsPage extends StatefulWidget {
 class _LocationsPageState extends State<LocationsPage> {
   @override
   Widget build(BuildContext context) {
-    final locations = Firestore.instance.collection("users").document(widget.uid).collection("locations");
-    List<String> names = <String>[];
-
-    //get devices
-    locations
-        .getDocuments()
-        .then((QuerySnapshot snapshot) {
-
-      snapshot.documents.forEach((f) =>
-      {
-        print(f.data["name"]),
-        names.add(f.data["name"])
-      });
-
-    });
-
-
-
-
-
-
     _addLocation() {
 
     }
@@ -45,16 +24,7 @@ class _LocationsPageState extends State<LocationsPage> {
         body: Column(
           children: <Widget>[
             Expanded(
-              child: ListView.builder(
-                padding: const EdgeInsets.all(8),
-                itemCount: names.length,
-                itemBuilder: (BuildContext context, int index) {
-                  return Container(
-                      height: 50,
-                      color: Colors.red,
-                      child: Center(child: Text("Entry ${names[index]}")));
-                },
-              ),
+              child: new LocationList(uid: widget.uid),
             ),
             RaisedButton(
               color: Colors.green[300],
@@ -68,3 +38,5 @@ class _LocationsPageState extends State<LocationsPage> {
         ));
   }
 }
+
+
