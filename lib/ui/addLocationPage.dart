@@ -11,7 +11,7 @@ class AddLocation extends StatelessWidget {
       appBar: AppBar(
         title: Text("Add new location"),
       ),
-      body: Text("Add new location")
+      body: Text("Function is not available at this moment")
     );
   }
 

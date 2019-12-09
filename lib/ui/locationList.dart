@@ -1,5 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:vivarium_control_unit/ui/locationPage.dart';
 
 class LocationList extends StatelessWidget {
   final String uid;
@@ -23,11 +24,22 @@ class LocationList extends StatelessWidget {
         }
         return new ListView(
           children: snapshot.data.documents.map((document) {
-            return new ListTile(
-              title: new Text(document['name']),
-              onTap: (){},
-              onLongPress: (){},
-              //subtitle: new Text(""+document['condition']),
+            return new Ink(
+              child: ListTile(
+                title: new Center(child: Text(document['name'])),
+
+                enabled: document["active"],
+                onTap: () {
+                  Navigator.of(context).push(
+                      MaterialPageRoute<Null>(builder: (BuildContext context) {
+                    return new LocationPage(
+                        uid: uid, locationId: document.documentID);
+                  }));
+                },
+                onLongPress: () {},
+                //subtitle: new Text(""+document['condition']),
+              ),
+              //color: document["active"]? Colors.lightGreen : Colors.grey,
             );
           }).toList(),
         );

@@ -11,6 +11,7 @@ String email;
 String imageUrl;
 String userId;
 String photonSecret;
+String photonAccessToken;
 
 Future<String> signInWithGoogle() async {
   final GoogleSignInAccount googleSignInAccount = await googleSignIn.signIn();
@@ -48,22 +49,39 @@ Future<String> signInWithGoogle() async {
   assert(user.uid == currentUser.uid);
 
   photonSecret = await createOrGetPhotonSecret(userId);
+  photonAccessToken = await getPhotonAccessToken(userId);
+  print(photonSecret);
+
 
   return 'signInWithGoogle succeeded: $user';
 }
 
 Future<String> createOrGetPhotonSecret(String uid) async {
   final ref = Firestore.instance.collection("users").document(uid);
-  String secret = "";
-  ref.get().then((document) {
+  String s = await ref.get().then((document) {
     if (!document.data.containsKey("particleSecret")) {
-      secret = randomAlpha(15);
+      String secret = randomAlpha(25);
       ref.setData({
-        "particleSecret": randomAlpha(15)
+        "particleSecret": secret
       });
+      return secret;
+    } else {
+      return document["particleSecret"];
     }
   });
+  return s;
+}
 
+Future<String> getPhotonAccessToken(String uid) async {
+  final ref = Firestore.instance.collection("users").document(uid);
+  String s = await ref.get().then((document) {
+    if (!document.data.containsKey("particle_access_token")) {
+      return "";
+    } else {
+      return document["particle_access_token"];
+    }
+  });
+  return s;
 }
 
 void signOutGoogle() async {

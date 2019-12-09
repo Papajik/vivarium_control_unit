@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:vivarium_control_unit/ui/addLocationPage.dart';
 import 'package:vivarium_control_unit/ui/locationList.dart';
+import 'package:vivarium_control_unit/utils/auth.dart';
 
 class LocationsPage extends StatefulWidget {
   final String uid;
@@ -13,11 +15,10 @@ class LocationsPage extends StatefulWidget {
 class _LocationsPageState extends State<LocationsPage> {
   @override
   Widget build(BuildContext context) {
-
     _addLocation() {
       Navigator.of(context)
           .push(MaterialPageRoute<Null>(builder: (BuildContext context) {
-        return new LocationsPage();
+        return new AddLocation(uid: userId);
       }));
     }
 
@@ -31,7 +32,7 @@ class _LocationsPageState extends State<LocationsPage> {
               child: new LocationList(uid: widget.uid),
             ),
             RaisedButton(
-              color: Colors.green[300],
+              color: Colors.blueGrey[300],
               onPressed: _addLocation,
               child: Text(
                 "Add location",

@@ -1,10 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:toast/toast.dart';
 import 'package:vivarium_control_unit/Constants.dart';
 import 'package:vivarium_control_unit/ui/LocationsPage.dart';
 import 'package:vivarium_control_unit/ui/SettingsPage.dart';
 import 'package:vivarium_control_unit/utils/auth.dart';
-import 'package:toast/toast.dart';
-
 
 class HomePage extends StatefulWidget {
   @override
@@ -17,19 +16,17 @@ class _LoginPageState extends State<HomePage> {
 
   @override
   Widget build(BuildContext context) {
-
-
     _showLogInWarning(context) {
-      Toast.show(Constants.of(context).signInWarningText, context, duration: Toast.LENGTH_SHORT, gravity: Toast.BOTTOM);
+      Toast.show(Constants.of(context).signInWarningText, context,
+          duration: Toast.LENGTH_SHORT, gravity: Toast.BOTTOM);
     }
 
-
-
     _onTap(int index) {
-      switch(index){
+      switch (index) {
         case 0:
-          if (_signed){
-            Navigator.of(context).push(MaterialPageRoute<Null>(builder:  (BuildContext context){
+          if (_signed) {
+            Navigator.of(context)
+                .push(MaterialPageRoute<Null>(builder: (BuildContext context) {
               return new LocationsPage(uid: userId);
             }));
           } else {
@@ -37,12 +34,12 @@ class _LoginPageState extends State<HomePage> {
           }
           break;
         case 1:
-          Navigator.of(context).push(MaterialPageRoute<Null>(builder:  (BuildContext context){
+          Navigator.of(context)
+              .push(MaterialPageRoute<Null>(builder: (BuildContext context) {
             return new SettingsPage();
           }));
           break;
       }
-
     }
 
     return Scaffold(
