@@ -35,8 +35,11 @@ Future<String> signInWithGoogle() async {
   name = user.displayName;
   email = user.email;
   imageUrl = user.photoUrl;
+  IdTokenResult idtoken = await user.getIdToken();
 
-  print(imageUrl);
+  print("UserID = "+userId);
+  print("idtoken = "+idtoken.toString());
+
 
   if (name.contains(" ")) {
     name = name.substring(0, name.indexOf(" "));

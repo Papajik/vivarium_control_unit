@@ -1,19 +1,21 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
-import 'package:vivarium_control_unit/ui/locationPage.dart';
+import 'package:vivarium_control_unit/utils/auth.dart';
+import 'package:vivarium_control_unit/ui/device/devicePage.dart';
 
 class LocationList extends StatelessWidget {
-  final String uid;
-
-  LocationList({Key key, @required this.uid}) : super(key: key);
+  String locationId;
+  LocationList({Key key, @required this.locationId}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
     return StreamBuilder<QuerySnapshot>(
       stream: Firestore.instance
           .collection("users")
-          .document(uid)
+          .document(userId)
           .collection("locations")
+          .document(locationId)
+          .collection("devices")
           .snapshots(),
       builder: (context, snapshot) {
         if (snapshot.hasError) {
@@ -32,9 +34,9 @@ class LocationList extends StatelessWidget {
                 onTap: () {
                   Navigator.of(context).push(
                       MaterialPageRoute<Null>(builder: (BuildContext context) {
-                    return new LocationPage(
-                        uid: uid, locationId: document.documentID);
-                  }));
+                        return new DevicePage(
+                          deviceName: document["name"]);
+                      }));
                 },
                 onLongPress: () {},
                 //subtitle: new Text(""+document['condition']),

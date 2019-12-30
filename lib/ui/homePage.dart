@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:toast/toast.dart';
 import 'package:vivarium_control_unit/Constants.dart';
-import 'package:vivarium_control_unit/ui/LocationsPage.dart';
+import 'package:vivarium_control_unit/ui/locations/LocationsPage.dart';
 import 'package:vivarium_control_unit/ui/SettingsPage.dart';
 import 'package:vivarium_control_unit/utils/auth.dart';
 
