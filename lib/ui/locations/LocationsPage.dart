@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:vivarium_control_unit/ui/addLocationPage.dart';
+import 'package:vivarium_control_unit/ui/addLocation/addLocationPage.dart';
 import 'package:vivarium_control_unit/ui/locations/locationList.dart';
 import 'package:vivarium_control_unit/utils/auth.dart';
 
