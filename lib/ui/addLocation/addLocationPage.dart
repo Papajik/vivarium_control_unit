@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_blue/flutter_blue.dart';
-import 'package:vivarium_control_unit/ui/addLocation/findDevicesPage.dart';
 import 'package:vivarium_control_unit/ui/addLocation/bluetoothOffPage.dart';
+import 'package:vivarium_control_unit/ui/test/findDeviceScreen.dart';
 
 class AddLocation extends StatefulWidget {
   final String uid;
@@ -23,7 +23,7 @@ class _AddLocationState extends State<AddLocation>{
       builder: (c, snapshot){
         final state = snapshot.data;
         if (state == BluetoothState.on){
-          return FindDevicesPage();
+          return FindDevicesScreen ();
         }
         return BluetoothOffPage(state: state);
       },

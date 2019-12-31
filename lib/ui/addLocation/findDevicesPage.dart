@@ -2,14 +2,14 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_blue/flutter_blue.dart';
 import 'package:vivarium_control_unit/ui/addLocation/locationTile.dart';
-import 'package:vivarium_control_unit/ui/device/devicePage.dart';
+import 'package:vivarium_control_unit/ui/addLocation/setupLocationPage.dart';
 
 class FindDevicesPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text("Add new location"),
+        title: Text("Find New Location"),
       ),
       body: RefreshIndicator(
         onRefresh: () =>
@@ -28,8 +28,7 @@ class FindDevicesPage extends StatelessWidget {
                           result: r,
                           onTap: () => Navigator.of(context)
                               .push(MaterialPageRoute(builder: (context) {
-                            r.device.connect();
-                            return DevicePage();
+                            return SetupLocationPage(device: r.device);
                           })),
                         ),
                       )
