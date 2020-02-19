@@ -47,10 +47,15 @@ class _LoginPageState extends State<HomePage> {
         title: Text("Vivarium control"),
         actions: <Widget>[
           FlatButton.icon(
-            icon: ImageIcon(
-              _signed
-                  ? Image.network(imageUrl).image
-                  : AssetImage("assets/google_logo.png"),
+            icon: Padding(
+              child: Image(
+                image:_signed
+                    ? Image.network(imageUrl).image
+                    : AssetImage("assets/google_logo.png"),
+                color:null,
+                alignment: Alignment.center,
+                fit: BoxFit.scaleDown,
+              ),padding: EdgeInsets.all(10),
             ),
             label:
                 Text(_signed ? _userName : Constants.of(context).notSignedText),
