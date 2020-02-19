@@ -7,7 +7,7 @@ class Constants extends InheritedWidget {
   const Constants({Widget child, Key key}) : super(key: key, child: child);
 
   final String logoutText = "Log out";
-  final String notSignedText = "Sign in with google";
+  final String notSignedText = "Sign In";
   final String signInWarningText = "You need to sign in first";
 
   @override

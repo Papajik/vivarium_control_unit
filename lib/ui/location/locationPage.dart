@@ -3,14 +3,14 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:toast/toast.dart';
+import 'package:vivarium_control_unit/models/location.dart';
 import 'package:vivarium_control_unit/utils/auth.dart';
 
 class LocationPage extends StatefulWidget {
   final String uid;
-  final String locationId;
-  final String locationName;
+  final Location location;
 
-  LocationPage({Key key, this.uid, this.locationId, this.locationName})
+  LocationPage({Key key, this.uid, this.location})
       : super(key: key);
 
   @override
@@ -20,14 +20,14 @@ class LocationPage extends StatefulWidget {
 class _LocationPageState extends State<LocationPage> {
   _getFunctions() async {
     var response = await http.get(Uri.encodeFull(
-        "https://api.particle.io/v1/devices/${widget.locationId}?access_token=$photonAccessToken"));
+        "https://api.particle.io/v1/devices/${widget.location.id}?access_token=$photonAccessToken"));
     Map data = json.decode(response.body);
     return data["functions"];
   }
 
   _getVariables() async {
     var response = await http.get(Uri.encodeFull(
-        "https://api.particle.io/v1/devices/${widget.locationId}?access_token=$photonAccessToken"));
+        "https://api.particle.io/v1/devices/${widget.location.id}?access_token=$photonAccessToken"));
     Map data = json.decode(response.body);
     Map variables = data["variables"];
     return variables.keys.toList();
@@ -35,7 +35,7 @@ class _LocationPageState extends State<LocationPage> {
 
   _getVariable(String variable) async{
     var response = await http.get(Uri.encodeFull(
-        "https://api.particle.io/v1/devices/${widget.locationId}/$variable?access_token=$photonAccessToken"));
+        "https://api.particle.io/v1/devices/${widget.location.id}/$variable?access_token=$photonAccessToken"));
     Map data = json.decode(response.body);
     return  data["result"].toString();
   }
@@ -46,7 +46,7 @@ class _LocationPageState extends State<LocationPage> {
   Widget build(BuildContext context) {
     return Scaffold(
         appBar: AppBar(
-          title: Text(widget.locationName + " - overview"),
+          title: Text(widget.location.name + " - overview"),
           centerTitle: true,
         ),
         body: Column(
@@ -114,7 +114,7 @@ class _LocationPageState extends State<LocationPage> {
         // also update the access token with your own.
 
         Uri.encodeFull(
-            "https://api.particle.io/v1/devices/${widget.locationId}/led"),
+            "https://api.particle.io/v1/devices/${widget.location.id}/led"),
         headers: {"Accept": "application/json"},
         body: {"arg": "off", "access_token": photonAccessToken});
     data = json.decode(response.body);

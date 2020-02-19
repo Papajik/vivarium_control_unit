@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_blue/flutter_blue.dart';
-import 'package:vivarium_control_unit/ui/addLocation/bluetoothOffPage.dart';
-import 'package:vivarium_control_unit/ui/test/findDeviceScreen.dart';
+import 'package:flutter_bluetooth_serial/flutter_bluetooth_serial.dart';
+import 'package:vivarium_control_unit/ui/addLocation/findBluetoothDevicesPage.dart';
 
 class AddLocation extends StatefulWidget {
   final String uid;
@@ -10,22 +9,45 @@ class AddLocation extends StatefulWidget {
 
   @override
   _AddLocationState createState() => _AddLocationState();
-
-
 }
 
-class _AddLocationState extends State<AddLocation>{
+class _AddLocationState extends State<AddLocation> {
+  bool _bleOn = false;
+
   @override
   Widget build(BuildContext context) {
     return StreamBuilder(
-      stream: FlutterBlue.instance.state,
-      initialData: BluetoothState.unknown,
-      builder: (c, snapshot){
+      stream: Stream.fromFuture(FlutterBluetoothSerial.instance.state),
+      initialData: BluetoothState.UNKNOWN,
+      builder: (c, snapshot) {
         final state = snapshot.data;
-        if (state == BluetoothState.on){
-          return FindDevicesScreen ();
+        if (state == BluetoothState.STATE_ON ||
+            state == BluetoothState.STATE_BLE_ON ||
+            _bleOn) {
+          return FindBluetoothDevicesPage();
         }
-        return BluetoothOffPage(state: state);
+        return Scaffold(
+          backgroundColor: Colors.lightBlue,
+          body: Center(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: <Widget>[
+                Icon(
+                  Icons.bluetooth_disabled,
+                  size: 200.0,
+                  color: Colors.white54,
+                ),
+                Text(
+                  'Bluetooth Adapter is ${state.toString().substring(15)}.',
+                  style: Theme.of(context)
+                      .primaryTextTheme
+                      .subhead
+                      .copyWith(color: Colors.white),
+                ),
+              ],
+            ),
+          ),
+        );
       },
     );
   }

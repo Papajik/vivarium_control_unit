@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_blue/flutter_blue.dart';
+import 'package:flutter_bluetooth_serial/flutter_bluetooth_serial.dart';
 
 class SetupLocationPage extends StatefulWidget {
   final BluetoothDevice device;
@@ -40,8 +40,8 @@ class _SetupLocationPage extends State<SetupLocationPage> {
 
   _createLocation(BluetoothDevice device){
 
-    device.connect(timeout: Duration(seconds: 4), autoConnect: false);
-    print("connected");
-    device.disconnect();
+   // device.connect(timeout: Duration(seconds: 4), autoConnect: false);
+   // print("connected");
+   // device.disconnect();
   }
 }

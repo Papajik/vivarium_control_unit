@@ -6,6 +6,7 @@ import 'package:vivarium_control_unit/utils/auth.dart';
 class LocationsPage extends StatefulWidget {
   final String uid;
 
+
   LocationsPage({Key key, this.uid}) : super(key: key);
 
   @override
@@ -15,6 +16,7 @@ class LocationsPage extends StatefulWidget {
 class _LocationsPageState extends State<LocationsPage> {
   @override
   Widget build(BuildContext context) {
+
     _addLocation() {
       Navigator.of(context)
           .push(MaterialPageRoute<Null>(builder: (BuildContext context) {

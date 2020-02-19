@@ -4,7 +4,7 @@ import 'package:vivarium_control_unit/utils/auth.dart';
 import 'package:vivarium_control_unit/ui/device/devicePage.dart';
 
 class LocationList extends StatelessWidget {
-  String locationId;
+  final String locationId;
   LocationList({Key key, @required this.locationId}) : super(key: key);
 
   @override

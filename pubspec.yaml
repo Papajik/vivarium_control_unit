@@ -23,6 +23,7 @@ dependencies:
   cloud_firestore: ^0.13.0+1
   google_sign_in: ^4.1.1
   flutter_blue: ^0.6.3+1
+  flutter_bluetooth_serial: ^0.2.2
   toast: ^0.1.5
   random_string: ^2.0.1
   particle_setup: ^0.1.0
