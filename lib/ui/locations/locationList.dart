@@ -16,11 +16,18 @@ class LocationList extends StatelessWidget {
             .collection("users")
             .document(uid)
             .collection("locations")
-            //  .orderBy("condition", descending: true) //TODO add index to firestore
+              //.orderBy("condition", descending: true) //TODO add index to firestore
             .where("active", isEqualTo: true)
             .snapshots(),
         builder: (context, snapshot) {
+          if (snapshot.hasError) {
+            return new Text('Error: ${snapshot.error}');
+          }
+          if (!snapshot.hasData) {
+            return Center(child: CircularProgressIndicator());
+          }
           List<DocumentSnapshot> locations = snapshot.data.documents;
+          print("sort");
           locations.sort((a, b) {
             if (a.data["condition"] < b.data["condition"])
               return 1;
@@ -29,12 +36,6 @@ class LocationList extends StatelessWidget {
             else
               return -1;
           });
-          if (snapshot.hasError) {
-            return new Text('Error: ${snapshot.error}');
-          }
-          if (!snapshot.hasData) {
-            return Center(child: CircularProgressIndicator());
-          }
           return new ListView(
             children: snapshot.data.documents.map((document) {
               return LocationTile(
