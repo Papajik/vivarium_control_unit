@@ -9,10 +9,10 @@ class TemperatureGraph extends StatefulWidget {
   TemperatureGraph({Key key, this.deviceId, this.userId}) : super(key: key);
 
   @override
-  _TemperatureGraphqPage createState() => _TemperatureGraphqPage();
+  _TemperatureGraphPage createState() => _TemperatureGraphPage();
 }
 
-class _TemperatureGraphqPage extends State<TemperatureGraph> {
+class _TemperatureGraphPage extends State<TemperatureGraph> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
