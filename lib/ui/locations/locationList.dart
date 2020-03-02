@@ -39,7 +39,6 @@ class LocationList extends StatelessWidget {
           return new ListView(
             children: snapshot.data.documents.map((document) {
               return LocationTile(
-                  //onLongPress: _onLongPress(document.documentID),
                   location:
                       Location.fromJSON(document.data, document.documentID));
             }).toList(),

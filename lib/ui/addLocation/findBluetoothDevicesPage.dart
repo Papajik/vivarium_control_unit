@@ -20,7 +20,7 @@ class FindBluetoothDevicesPage extends StatelessWidget {
                 initialData: [],
                 builder: (c, snapshot) => Column(
                   children: snapshot.data
-                      .where((c) => c.device.name == "Photon-UCN")
+                   //   .where((c) => c.device.name == "Photon-UCN")
                       .map(
                         (r) => BluetoothDeviceTile(
                           onTap: () => Navigator.of(context)

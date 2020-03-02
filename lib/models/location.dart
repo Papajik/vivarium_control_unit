@@ -9,6 +9,7 @@ class Location {
   final Timestamp lastUpdate;
   final int deviceCount;
 
+
   const Location(
       {this.id, this.name, this.condition, this.lastUpdate, this.deviceCount});
 
