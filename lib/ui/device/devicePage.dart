@@ -21,12 +21,14 @@ class _DevicePage extends State<DevicePage> {
         title: Text(widget.device.name + " - overview"),
         centerTitle: true,
       ),
-      body: Column(
+      body: ListView(
         children: <Widget>[
-          Expanded(
+          Container(
+            height: 500,
             child: TemperatureGraph(deviceId: widget.device.id, userId: userId)
           ),
-          Expanded(
+          Container(
+            height: 100,
             child: DeviceSettingsSubpage(deviceId: widget.device.id)
           )
         ],

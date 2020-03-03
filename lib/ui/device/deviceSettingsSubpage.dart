@@ -13,7 +13,9 @@ class _DeviceSettingsSubpageState extends State<DeviceSettingsSubpage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Text("settings body")
+      body: Container(
+        child: Text("settings body"),
+      )
     );
   }
 
