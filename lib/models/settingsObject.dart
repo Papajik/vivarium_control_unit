@@ -26,9 +26,14 @@ class SettingsObject {
         );
 
   Map<String, dynamic> toJson()=>{
+
     "heaterAuto":heaterAuto,
     "tempGoal":num.parse(tempGoal.toStringAsFixed(1))
   };
+
+  Map<String, dynamic> toMap(){
+    return {"heaterAuto":heaterAuto, "tempGoal":num.parse(tempGoal.toStringAsFixed(1))};
+  }
 }
 
 class LightsInstruction {

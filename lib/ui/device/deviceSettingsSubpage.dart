@@ -1,5 +1,3 @@
-import 'dart:convert';
-
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/painting.dart';
@@ -19,6 +17,7 @@ class DeviceSettingsSubpage extends StatefulWidget {
 class _DeviceSettingsSubpageState extends State<DeviceSettingsSubpage> {
   bool _change = false;
   SettingsObject _settings;
+  bool _default = true;
 
   @override
   Widget build(BuildContext context) {
@@ -32,8 +31,12 @@ class _DeviceSettingsSubpageState extends State<DeviceSettingsSubpage> {
             future: _getSettings(),
             builder: (context, snapshot) {
               if (snapshot.hasData) {
-                if (_settings == null) {
+                if (_settings == null || _default) {
                   _settings = snapshot.data;
+                  print("getting data");
+                  _default = false;
+                  print(_settings.tempGoal);
+                  print(_settings.heaterAuto);
                 }
               } else {
                 if (_settings == null) {
@@ -41,6 +44,9 @@ class _DeviceSettingsSubpageState extends State<DeviceSettingsSubpage> {
                       new SettingsObject(heaterAuto: true, tempGoal: 20);
                 }
               }
+              print(_settings.tempGoal);
+              print(_settings.heaterAuto);
+
 
               return Column(
                 children: <Widget>[
@@ -51,6 +57,7 @@ class _DeviceSettingsSubpageState extends State<DeviceSettingsSubpage> {
                         value: _settings.heaterAuto,
                         onChanged: (value) {
                           setState(() {
+                            _default = false;
                             _change = true;
                             _settings = new SettingsObject(
                                 tempGoal: _settings.tempGoal,
@@ -71,6 +78,7 @@ class _DeviceSettingsSubpageState extends State<DeviceSettingsSubpage> {
                         max: 30,
                         onChanged: (value) {
                           setState(() {
+                            _default = false;
                             _change = true;
                             _settings = new SettingsObject(
                                 tempGoal: value,
@@ -123,7 +131,7 @@ class _DeviceSettingsSubpageState extends State<DeviceSettingsSubpage> {
             .document(widget.userId)
             .collection("devices")
             .document(widget.deviceId)
-            .updateData({"settings": jsonEncode(_settings)});
+            .updateData({"settings": _settings.toMap()});
 
         setState(() {
           _change = false;
