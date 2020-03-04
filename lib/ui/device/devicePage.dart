@@ -24,12 +24,17 @@ class _DevicePage extends State<DevicePage> {
       body: ListView(
         children: <Widget>[
           Container(
-            height: 500,
+            height: 350,
             child: TemperatureGraph(deviceId: widget.device.id, userId: userId)
           ),
+          Divider(
+            color: Colors.blueGrey,
+            height: 10,
+            thickness: 5,
+          ),
           Container(
-            height: 100,
-            child: DeviceSettingsSubpage(deviceId: widget.device.id)
+            height: 200,
+            child: DeviceSettingsSubpage(deviceId: widget.device.id, userId: userId)
           )
         ],
       )

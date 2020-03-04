@@ -6,7 +6,7 @@ import 'package:vivarium_control_unit/models/sensorData.dart';
 class TemperatureGraph extends StatefulWidget {
   final String deviceId;
   final String userId;
-  final double minTemperature = -10;
+  final double minTemperature = 5;
 
   TemperatureGraph({Key key, this.deviceId, this.userId}) : super(key: key);
 
@@ -106,11 +106,11 @@ class _TemperatureGraphPage extends State<TemperatureGraph> {
           ),
           (_temps['temp1'] != null)
               ? Text(
-                  "Temperature 1: " + _temps['temp1'].round().toString() + "°C")
+                  "Temperature 1: " + _temps['temp1'].toString() + "°C")
               : Text(""),
           (_temps['temp2'] != null)
               ? Text(
-                  "Temperature 2: " + _temps['temp2'].round().toString() + "°C")
+                  "Temperature 2: " + _temps['temp2'].toString() + "°C")
               : Text(""),
           Slider(
             value: _showLastMinutes,
