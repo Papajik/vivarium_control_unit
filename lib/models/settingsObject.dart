@@ -1,47 +1,51 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:vivarium_control_unit/models/ledTrigger.dart';
+import 'package:vivarium_control_unit/models/peripherals.dart';
 
 class SettingsObject {
-  final bool heaterAuto;
-  final double tempGoal;
+  bool heaterAuto;
+  double tempGoal;
+  Peripherals peripherals;
+  List<LedTrigger> ledTriggers;
 
-  // final List<LightsInstruction> lightsInstructions;
+  SettingsObject(
+      {this.peripherals, this.heaterAuto, this.tempGoal, this.ledTriggers});
 
-  SettingsObject({
-    this.heaterAuto,
-    this.tempGoal,
-    //this.lightsInstructions
-  });
-
-  SettingsObject.fromJSON(Map<String, dynamic> data)
+  SettingsObject.fromJson(Map<String, dynamic> data)
       : this(
-          heaterAuto: data['heaterAuto'],
-          tempGoal: data['tempGoal'].toDouble(),
-          /**
+            heaterAuto: data['heaterAuto'],
+            tempGoal: data['tempGoal'].toDouble(),
+            peripherals: Peripherals.fromJson(
+                Map<String, dynamic>.from(data['peripherals'])),
+            ledTriggers: createListOfTriggers(data['ledTriggers'])
+            // ledTriggers: json.decode(data['ledTriggers']).map((Map model) => LedTrigger.fromJson(data)),
+            /**
         lightsInstructions: json
         .decode(data['lights'])
         .map((Map model) =>
         {print(model), LightsInstruction.fromJSON(model)})
         .toList()
      */
-        );
+            );
 
-  Map<String, dynamic> toJson()=>{
+  Map<String, dynamic> toJson() => {
+        "heaterAuto": heaterAuto,
+        "tempGoal": num.parse(tempGoal.toStringAsFixed(1)),
+        "peripherals": peripherals.toJson()
+      };
 
-    "heaterAuto":heaterAuto,
-    "tempGoal":num.parse(tempGoal.toStringAsFixed(1))
-  };
-
-  Map<String, dynamic> toMap(){
-    return {"heaterAuto":heaterAuto, "tempGoal":num.parse(tempGoal.toStringAsFixed(1))};
+  Map<String, dynamic> toMap() {
+    return {
+      "heaterAuto": heaterAuto,
+      "tempGoal": num.parse(tempGoal.toStringAsFixed(1)),
+      "peripherals": peripherals.toJson(),
+    };
   }
-}
 
-class LightsInstruction {
-  final String instruction;
-  final Timestamp time;
-
-  const LightsInstruction({this.instruction, this.time});
-
-  LightsInstruction.fromJSON(Map<String, dynamic> data)
-      : this(instruction: data['instruction'], time: data['time']);
+  static List<LedTrigger> createListOfTriggers(List data) {
+    List<LedTrigger> list = new List();
+    for (Map i in data) {
+      list.add(LedTrigger.fromJson(Map<String, dynamic>.from(i)));
+    }
+    return list;
+  }
 }

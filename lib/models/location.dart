@@ -13,7 +13,7 @@ class Location {
   const Location(
       {this.id, this.name, this.condition, this.lastUpdate, this.deviceCount});
 
-  Location.fromJSON(Map<String, dynamic> data, String id)
+  Location.fromJson(Map<String, dynamic> data, String id)
       : this(
             id: id,
             name: data["name"],
