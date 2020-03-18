@@ -40,7 +40,7 @@ class LocationList extends StatelessWidget {
             children: snapshot.data.documents.map((document) {
               return LocationTile(
                   location:
-                      Location.fromJSON(document.data, document.documentID));
+                      Location.fromJson(document.data, document.documentID));
             }).toList(),
           );
         });
