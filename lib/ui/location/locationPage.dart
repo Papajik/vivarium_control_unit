@@ -23,6 +23,15 @@ class _LocationPageState extends State<LocationPage> {
         appBar: AppBar(
           title: Text(widget.location.name + " - overview"),
           centerTitle: true,
+          actions: <Widget>[
+            IconButton(
+              icon: Icon(
+                Icons.insert_link,
+                color: Colors.white,
+              ),
+              onPressed: _connect,
+            )
+          ],
         ),
         body: Column(
           children: <Widget>[
@@ -49,5 +58,9 @@ class _LocationPageState extends State<LocationPage> {
     print(data);
 
     return "Success!";
+  }
+
+  _connect(){
+    print("connect");
   }
 }
