@@ -1,13 +1,17 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/painting.dart';
+import 'package:flutter_blue/flutter_blue.dart';
+import 'package:vivarium_control_unit/Constants.dart';
 import 'package:vivarium_control_unit/models/settingsObject.dart';
+
 
 class DeviceSettingsSubpage extends StatefulWidget {
   final String deviceId;
   final String userId;
+  final BluetoothDevice device;
 
-  DeviceSettingsSubpage({Key key, this.deviceId, this.userId})
+  DeviceSettingsSubpage({Key key, this.deviceId, this.userId, this.device})
       : super(key: key);
 
   @override
@@ -19,8 +23,30 @@ class _DeviceSettingsSubpageState extends State<DeviceSettingsSubpage> {
   SettingsObject _settings;
   bool _default = true;
 
+
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+  }
+
   @override
   Widget build(BuildContext context) {
+    return Scaffold(
+        body: _settings == null //No settings, has to load it
+            ? FutureBuilder(
+                future: _getSettings(),
+                builder: (context, snapshot) {
+                  return _createSettingList(snapshot.hasData
+                      ? snapshot.data
+                      : SettingsObject
+                          .newEmpty()); //didn't receive any data (usually settings haven't been saved yet) -> create new one
+                },
+              )
+            : _createSettingList(_settings)); //Use settings alredy in use
+  }
+
+  Widget buildObsolete(BuildContext context) {
     return Scaffold(
         body: Column(
       children: <Widget>[
@@ -30,113 +56,204 @@ class _DeviceSettingsSubpageState extends State<DeviceSettingsSubpage> {
         FutureBuilder(
             future: _getSettings(),
             builder: (context, snapshot) {
+              print("");
+              print("Builder : new build");
               if (snapshot.hasData) {
                 if (_settings == null || _default) {
                   _settings = snapshot.data;
-                  print("getting data");
+                  print("Builder : snapshot has data - will modify");
                   _default = false;
-                  print(_settings.tempGoal);
-                  print(_settings.heaterAuto);
+                } else {
+                  print("Builder : snapshot has data - won't modify");
                 }
               } else {
                 if (_settings == null) {
-                  _settings =
-                      new SettingsObject(heaterAuto: true, tempGoal: 20);
+                  print(
+                      "Builder : snapshot has no data & settings = null => create new settings object");
+                  _settings = SettingsObject.newEmpty();
+                } else {
+                  print(
+                      "Builder : snapshot has no data & settings != null => do nothing");
                 }
               }
-              print(_settings.tempGoal);
-              print(_settings.heaterAuto);
 
+              print("Builder : info ");
+              print((_settings.ledTriggers != null)
+                  ? "Builder :" + _settings.ledTriggers.toString()
+                  : "Builder : no triggers");
+              print("");
 
-              return Column(
-                children: <Widget>[
-                  Row(
-                    children: <Widget>[
-                      Text("Heater auto"),
-                      Checkbox(
-                        value: _settings.heaterAuto,
-                        onChanged: (value) {
+              return Column(children: <Widget>[
+                (widget.device == null)
+                    ? Text("device null")
+                    : Text("device provided"),
+                Text("ASDFDSADS"),
+                Row(children: <Widget>[
+                  /**
+                          Text("Fan"),
+                          Checkbox(
+                          value: _settings.peripherals.fan,
+                          activeColor: Colors.green,
+                          onChanged: (value){
                           setState(() {
-                            _default = false;
-                            _change = true;
-                            _settings = new SettingsObject(
-                                tempGoal: _settings.tempGoal,
-                                heaterAuto: value);
+                          _default = false;
+                          _change = true;
+                          _settings.peripherals.fan = value;
+                          print(value);
                           });
-                        },
-                        activeColor: Colors.green,
-                        tristate: false,
-                      )
-                    ],
-                  ),
-                  Row(
-                    children: <Widget>[
-                      Text("Temperature Goal"),
-                      Slider(
-                        value: _settings.tempGoal,
-                        min: 15,
-                        max: 30,
-                        onChanged: (value) {
+                          },
+                          tristate: true,
+                          )
+                          ]),
+
+                          Row(
+                          children: <Widget>[
+                          Text("Heater auto"),
+                          Checkbox(
+                          value: _settings.heaterAuto,
+                          onChanged: (value) {
                           setState(() {
-                            _default = false;
-                            _change = true;
-                            _settings = new SettingsObject(
-                                tempGoal: value,
-                                heaterAuto: _settings.heaterAuto);
+                          _default = false;
+                          _change = true;
+                          _settings.heaterAuto = value;
                           });
-                        },
-                      ),
-                      Text(_settings.tempGoal.toStringAsFixed(1))
-                    ],
-                  ),
+                          },
+                          activeColor: Colors.green,
+                          tristate: false,
+                          )
+                          ],
+                          ),
+                          Row(
+                          children: <Widget>[
+                          Text("Temperature Goal"),
+                          Slider(
+                          value: _settings.tempGoal,
+                          min: 15,
+                          max: 30,
+                          onChanged: (value) {
+                          setState(() {
+                          _default = false;
+                          _change = true;
+                          _settings.tempGoal = value;
+                          });
+                          },
+                          ),
+                          Text(_settings.tempGoal.toStringAsFixed(1))
+                          ],
+                          ),
+                       */
                   Center(
-                    child: RaisedButton(
-                      onPressed: _saveSettings(),
-                      child: Text(
-                        "Save settings",
-                        style: TextStyle(fontSize: 18),
-                      ),
-                      color: Colors.blue,
+                      child: RaisedButton(
+                    onPressed: _change ? _saveSettings() : null,
+                    child: Text(
+                      "Save settings",
+                      style: TextStyle(fontSize: 18),
                     ),
-                  )
-                ],
-              );
+                    color: Colors.blue,
+                  ))
+                ])
+              ]);
             })
       ],
     ));
   }
 
-  _getSettings() async {
-    var docRef = Firestore.instance
+  Future<SettingsObject> _getSettings() async {
+    var docRef = FirebaseFirestore.instance
         .collection("users")
-        .document(widget.userId)
+        .doc(widget.userId)
         .collection("devices")
-        .document(widget.deviceId);
+        .doc(widget.deviceId);
     var data = await docRef.get();
 
-    var settings = data["settings"];
-    var obj = SettingsObject.fromJSON(Map<String, dynamic>.from(settings));
+    //  print("getSettings - start");
+
+    var settings = data.data()["settings"];
+    // print(settings);
+    print("getSettings - createObject");
+    //  print(settings["additionalInfo"]);
+    // print(settings["peripherals"]);
+    //print(settings["ledTriggers"]);
+    var obj = SettingsObject.fromJson(Map<String, dynamic>.from(settings));
+    //   print("getSettings - object created");
+    // print(obj.peripherals.length);
     return obj;
   }
 
   _saveSettings() {
-    if (!_change) {
-      return null;
+    FirebaseFirestore.instance
+        .collection("users")
+        .doc(widget.userId)
+        .collection("devices")
+        .doc(widget.deviceId)
+        .update({"settings": _settings.toJson()});
+
+    if (widget.device != null) {
+      _saveToDevice().then((value) => {
+            setState(() {
+              _change = false;
+            })
+          });
     } else {
-
-
-      return () {
-        Firestore.instance
-            .collection("users")
-            .document(widget.userId)
-            .collection("devices")
-            .document(widget.deviceId)
-            .updateData({"settings": _settings.toMap()});
-
-        setState(() {
-          _change = false;
-        });
-      };
+      setState(() {
+        _change = false;
+      });
     }
+  }
+
+  Future<bool> _saveToDevice() async {
+    if (widget.device == null) return false;
+    List<BluetoothService> services = await widget.device.discoverServices();
+    services.forEach((service) {
+      if (service.uuid.toString().toUpperCase().substring(4, 8) ==
+          Constants.of(context).bleService) {
+        service.characteristics.forEach((characteristic) {
+          if (characteristic.uuid.toString().toUpperCase().substring(4, 8) ==
+              Constants.of(context).bleCharacteristic) {
+            //TODO add Flutter - Arduino communication
+          }
+        });
+      }
+    });
+    return true;
+  }
+
+  _getDeviceCharacteristic() {
+    print("settings subpage: set characteristic");
+    widget.device.discoverServices().then((services) => {
+          services.forEach((service) {
+            print(service.uuid);
+            if (service.uuid.toString().toUpperCase().substring(4, 8) ==
+                Constants.of(context).bleService) {
+              print("settings subpage: characteristics:");
+              service.characteristics.forEach((characteristic) {
+                if (characteristic.uuid
+                        .toString()
+                        .toUpperCase()
+                        .substring(4, 8) ==
+                    Constants.of(context).bleCharacteristic) {
+                  print(characteristic);
+                  setState(() {
+                    //_characteristic = characteristic;
+                  });
+                }
+              });
+            }
+          })
+        });
+  }
+
+  Widget _createSettingList(SettingsObject settingsObject) {
+
+
+
+    return Column(
+      children: [
+        RaisedButton(
+            child: Text(Constants.of(context).deviceSaveSettings),
+          onPressed: null,
+          ),
+      ],
+    );
   }
 }
