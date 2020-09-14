@@ -28,4 +28,8 @@ class LedTrigger {
   Map<String, dynamic> toMap(){
     return toJson();
   }
+
+  String toString(){
+    return "Trigger:"+hour.toString()+":"+minute.toString()+":" +second.toString()+" -> ""Color: "+color.toString();
+  }
 }
