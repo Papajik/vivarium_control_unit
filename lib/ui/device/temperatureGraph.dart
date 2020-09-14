@@ -54,11 +54,11 @@ class _TemperatureGraphPage extends State<TemperatureGraph> {
           Container(
             height: 200,
             child: StreamBuilder(
-                stream: Firestore.instance
+                stream: FirebaseFirestore.instance
                     .collection("users")
-                    .document(widget.userId)
+                    .doc(widget.userId)
                     .collection("deviceHistories")
-                    .document(widget.deviceId)
+                    .doc(widget.deviceId)
                     .snapshots(),
                 builder: (context, snapshot) {
                   if (snapshot.hasError) {
@@ -105,12 +105,10 @@ class _TemperatureGraphPage extends State<TemperatureGraph> {
                 (_time != null) ? Text("Time: " + _time.toString()) : Text(""),
           ),
           (_temps['temp1'] != null)
-              ? Text(
-                  "Temperature 1: " + _temps['temp1'].toString() + "°C")
+              ? Text("Temperature 1: " + _temps['temp1'].toString() + "°C")
               : Text(""),
           (_temps['temp2'] != null)
-              ? Text(
-                  "Temperature 2: " + _temps['temp2'].toString() + "°C")
+              ? Text("Temperature 2: " + _temps['temp2'].toString() + "°C")
               : Text(""),
           Slider(
             value: _showLastMinutes,
