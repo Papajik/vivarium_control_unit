@@ -1,3 +1,5 @@
+import 'package:vivarium_control_unit/models/camera.dart';
+
 import 'sensorData.dart';
 
 enum Condition { GREEN, YELLOW, RED, UNKNOWN }
@@ -10,6 +12,8 @@ class Device {
   final Condition condition;
   final Type type;
   final SensorData sensorValues;
+  final String macAddress;
+  final Camera camera;
 
   //final List<SensorValues> sensorValuesHistory;
 
@@ -20,6 +24,8 @@ class Device {
     this.condition,
     this.type,
     this.sensorValues,
+    this.macAddress,
+    this.camera
   });
 
   Device.fromJSON(Map<String, dynamic> data)
@@ -35,7 +41,10 @@ class Device {
                 ? Type.values.firstWhere((e) => e.toString()==data['info']['type'])
                 : Type.UNKNOWN,
             sensorValues: SensorData.fromJSON(
-                new Map<String, dynamic>.from(data['sensorValues'])));
+                new Map<String, dynamic>.from(data['sensorValues'])),
+            macAddress: data['info']['macAddress'],
+            camera: Camera.fromJSON(data['camera'])
+  );
 }
 
 
