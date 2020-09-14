@@ -25,7 +25,7 @@ class BluetoothOffPage extends StatelessWidget{
               'Bluetooth Adapter is ${state.toString().substring(15)}.',
               style: Theme.of(context)
                   .primaryTextTheme
-                  .subhead
+                  .subtitle1
                   .copyWith(color: Colors.white),
             ),
           ],
