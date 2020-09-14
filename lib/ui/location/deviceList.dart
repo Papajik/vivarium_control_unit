@@ -12,9 +12,9 @@ class DeviceList extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return StreamBuilder<QuerySnapshot>(
-      stream: Firestore.instance
+      stream: FirebaseFirestore.instance
           .collection("users")
-          .document(userId)
+          .doc(userId)
           .collection("devices")
           .where("info.location", isEqualTo: locationId)
           .where("info.active", isEqualTo: true)
@@ -27,9 +27,10 @@ class DeviceList extends StatelessWidget {
           return Center(child: CircularProgressIndicator());
         }
         return new ListView(
-          children: snapshot.data.documents.map((document) {
+          children: snapshot.data.docs.map((document) {
+            print(document.data);
             return DeviceTile(
-              device: Device.fromJSON(document.data),
+              device: Device.fromJSON(document.data()),
             );
           }).toList(),
         );

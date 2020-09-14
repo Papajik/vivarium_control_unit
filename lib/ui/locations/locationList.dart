@@ -12,9 +12,9 @@ class LocationList extends StatelessWidget {
 
   Widget build(BuildContext context) {
     return StreamBuilder<QuerySnapshot>(
-        stream: Firestore.instance
+        stream: FirebaseFirestore.instance
             .collection("users")
-            .document(uid)
+            .doc(uid)
             .collection("locations")
               //.orderBy("condition", descending: true) //TODO add index to firestore
             .where("active", isEqualTo: true)
@@ -26,21 +26,21 @@ class LocationList extends StatelessWidget {
           if (!snapshot.hasData) {
             return Center(child: CircularProgressIndicator());
           }
-          List<DocumentSnapshot> locations = snapshot.data.documents;
+          List<DocumentSnapshot> locations = snapshot.data.docs;
           print("sort");
           locations.sort((a, b) {
-            if (a.data["condition"] < b.data["condition"])
+            if (a.data()["condition"] < b.data()["condition"])
               return 1;
-            else if (a.data["condition"] == b.data["condition"])
+            else if (a.data()["condition"] == b.data()["condition"])
               return 0;
             else
               return -1;
           });
           return new ListView(
-            children: snapshot.data.documents.map((document) {
+            children: snapshot.data.docs.map((document) {
               return LocationTile(
                   location:
-                      Location.fromJson(document.data, document.documentID));
+                      Location.fromJson(document.data(), document.id));
             }).toList(),
           );
         });
