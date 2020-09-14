@@ -34,7 +34,7 @@ class FindBluetoothDevicesPage extends StatelessWidget {
               ),
             ],
           ),
-        ), onRefresh: () {},
+        ), onRefresh: () {return null;},
       ),
       floatingActionButton: StreamBuilder<bool>(
           stream: Stream.fromFuture(FlutterBluetoothSerial.instance.isDiscovering),
