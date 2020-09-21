@@ -1,12 +1,15 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_settings_screens/flutter_settings_screens.dart';
 import 'package:vivarium_control_unit/Constants.dart';
 import 'package:vivarium_control_unit/ui/homePage.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:vivarium_control_unit/utils/cacheProvider.dart';
 
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp();
+  await Settings.init(cacheProvider: HiveCache());
   runApp(Constants(
     child: MyApp(),
   ));

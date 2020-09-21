@@ -1,6 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:vivarium_control_unit/ui/device/temperatureGraph.dart';
-import 'package:vivarium_control_unit/utils/auth.dart';
 
 class DeviceOverviewSubpage extends StatefulWidget {
   final String deviceId;
@@ -17,11 +15,10 @@ class _DeviceOverviewSubpageState extends State<DeviceOverviewSubpage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Container(
-          height: 350,
-          child: TemperatureGraph(
-              deviceId: widget.deviceId, userId: userId))
-    );
+        body: Container(
+            height: 350,
+            //    child: TemperatureGraph(
+            //      deviceId: widget.deviceId, userId: userId))
+            child: Text("graph here")));
   }
-  
 }

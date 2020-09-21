@@ -1,35 +1,31 @@
-class LedTrigger {
-  int hour;
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:hive/hive.dart';
+
+part 'ledTrigger.g.dart';
+
+@HiveType(typeId: 3)
+class LedTrigger extends HiveObject {
+  @HiveField(0)
+  DateTime dateTime;
+  @HiveField(1)
   int color;
-  int second;
-  int minute;
 
   LedTrigger({
-    this.hour,
+    this.dateTime,
     this.color,
-    this.second,
-    this.minute,
   });
 
-  factory LedTrigger.fromJson(Map<String, dynamic> json) => LedTrigger(
-    hour: json["hour"],
-    color: json["color"],
-    second: json["second"],
-    minute: json["minute"],
-  );
+  factory LedTrigger.fromJson(Map<String, dynamic> json) =>
+      LedTrigger(dateTime: json["time"].toDate(), color: json["color"]);
 
-  Map<String, dynamic> toJson() => {
-    "hour": hour,
-    "color": color,
-    "second": second,
-    "minute": minute,
-  };
+  Map<String, dynamic> toJson() =>
+      {"time": Timestamp.fromDate(dateTime), "color": color};
 
-  Map<String, dynamic> toMap(){
+  Map<String, dynamic> toMap() {
     return toJson();
   }
 
-  String toString(){
-    return "Trigger:"+hour.toString()+":"+minute.toString()+":" +second.toString()+" -> ""Color: "+color.toString();
+  String toString() {
+    return '{"time": $dateTime,"color": $color }';
   }
 }

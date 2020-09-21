@@ -9,7 +9,7 @@ class SensorData {
 
   SensorData.fromJSON(Map<String, dynamic> data)
       : this(
-      temp1: data['temp_1'].toDouble(),
-      temp2: data['temp_2'].toDouble(),
+      temp1: data['waterTemperature1'].toDouble(),
+      temp2: data['waterTemperature2'].toDouble(),
       updateTime: data['updateTime']);
 }

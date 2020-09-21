@@ -3,12 +3,16 @@ import 'package:flutter/material.dart';
 import 'package:flutter_blue/flutter_blue.dart';
 import 'package:flutter_bluetooth_serial/flutter_bluetooth_serial.dart'
     as FlutterB;
+import 'package:hive/hive.dart';
 import 'package:vivarium_control_unit/Constants.dart';
 import 'package:vivarium_control_unit/models/device.dart';
+import 'package:vivarium_control_unit/models/feedTrigger.dart';
+import 'package:vivarium_control_unit/models/ledTrigger.dart';
 import 'package:vivarium_control_unit/ui/device/deviceOverviewSubpage.dart';
 import 'package:vivarium_control_unit/ui/device/deviceSettingsSubpage.dart';
 import 'package:vivarium_control_unit/ui/device/deviceViewSubpage.dart';
 import 'package:vivarium_control_unit/utils/auth.dart';
+import 'package:vivarium_control_unit/utils/hiveBoxes.dart';
 
 FlutterBlue flutterBlue = FlutterBlue.instance;
 
@@ -77,10 +81,20 @@ class _DevicePage extends State<DevicePage> {
           body: TabBarView(
             children: [
               DeviceOverviewSubpage(userId: userId, deviceId: widget.device.id),
-              DeviceSettingsSubpage(
-                  userId: userId,
-                  deviceId: widget.device.id,
-                  device: _bluetoothDevice),
+              FutureBuilder(
+                future: _initializeHive(),
+                builder: (context, snapshot) {
+                  if (!snapshot.hasData)
+                    return Container(
+                      child: Text(""),
+                    );
+                  return DeviceSettingsSubpage(
+                      useCloud: true,
+                      userId: userId,
+                      deviceId: widget.device.id,
+                      device: _bluetoothDevice);
+                },
+              ),
               DeviceViewSubpage(userId: userId, device: widget.device),
             ],
           ),
@@ -222,5 +236,12 @@ class _DevicePage extends State<DevicePage> {
             );
           }
         });
+  }
+
+  _initializeHive() async {
+    await Hive.openBox<FeedTrigger>(
+        HiveBoxes.feedTriggerList + widget.device.id);
+    await Hive.openBox<LedTrigger>(HiveBoxes.ledTriggerList + widget.device.id);
+    return true;
   }
 }
