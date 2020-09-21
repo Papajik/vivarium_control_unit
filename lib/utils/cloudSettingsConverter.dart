@@ -21,7 +21,7 @@ class SettingsConverter {
 
   SettingsConverter({this.deviceId, this.userId});
 
-  Future<bool> loadSettingsFromCloud() async {
+  Future<void> loadSettingsFromCloud() async {
     var docRef = FirebaseFirestore.instance
         .collection("users")
         .doc(userId)
@@ -36,7 +36,6 @@ class SettingsConverter {
     print(settingsObject.feedTriggers);
     print(settingsObject.ledTriggers);
     await updateCache(settingsObject);
-    return true;
   }
 
   updateCache(SettingsObject settingsObject) async {
