@@ -28,8 +28,8 @@ class _DevicePage extends State<DevicePage> {
   @override
   void initState() {
     super.initState();
-    _bluetoothHandler = BluetoothHandler(
-        widget.device.macAddress, widget.device.name);
+    _bluetoothHandler =
+        BluetoothHandler(widget.device.macAddress, widget.device.name);
 
     ///Whenever is bluetooth state changed, rebuild widget
     FlutterBluetoothSerial.instance
@@ -120,7 +120,7 @@ class _DevicePage extends State<DevicePage> {
       stream: _bluetoothHandler.state(),
       builder: (context, snapshot) {
         print(snapshot.data);
-        if (_bluetoothHandler.isDeviceConnected()) {
+        if (snapshot.data == HandlerState.CONNECTED) {
           return IconButton(
             icon: Icon(Icons.link_off, color: Colors.orange),
             onPressed: () async {
@@ -128,7 +128,8 @@ class _DevicePage extends State<DevicePage> {
               setState(() {});
             },
           );
-        } else {
+        }
+        if (snapshot.data == HandlerState.DISCONNECTED) {
           return IconButton(
             icon: Icon(Icons.insert_link, color: Colors.white),
             onPressed: _bluetoothHandler.isConnecting()
@@ -138,6 +139,7 @@ class _DevicePage extends State<DevicePage> {
                   },
           );
         }
+        return IconButton(icon: Icon(Icons.error_outline_sharp), onPressed: null);
       },
     );
   }
