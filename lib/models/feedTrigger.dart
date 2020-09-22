@@ -1,18 +1,18 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:hive/hive.dart';
+
 part 'feedTrigger.g.dart';
 
-
 @HiveType(typeId: 1)
-enum FeedType{
- BOX, SCREW
+enum FeedType {
+  @HiveField(0)
+  BOX,
+  @HiveField(1)
+  SCREW
 }
 
-
-
-
 @HiveType(typeId: 2)
-class FeedTrigger  extends HiveObject{
+class FeedTrigger extends HiveObject {
   @HiveField(0)
   FeedType type;
 
@@ -22,9 +22,8 @@ class FeedTrigger  extends HiveObject{
   FeedTrigger({this.dateTime, this.type});
 
   factory FeedTrigger.fromJson(Map<String, dynamic> json) => FeedTrigger(
-    dateTime: json['time'].toDate(),
-    type: FeedType.values.firstWhere((e) => e.toString() == json['type'])
-  );
+      dateTime: json['time'].toDate(),
+      type: FeedType.values.firstWhere((e) => e.toString() == json['type']));
 
   Map<String, dynamic> toJson() =>
       {"time": Timestamp.fromDate(dateTime), "type": type.toString()};

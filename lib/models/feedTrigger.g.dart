@@ -13,6 +13,10 @@ class FeedTypeAdapter extends TypeAdapter<FeedType> {
   @override
   FeedType read(BinaryReader reader) {
     switch (reader.readByte()) {
+      case 0:
+        return FeedType.BOX;
+      case 1:
+        return FeedType.SCREW;
       default:
         return null;
     }
@@ -21,6 +25,12 @@ class FeedTypeAdapter extends TypeAdapter<FeedType> {
   @override
   void write(BinaryWriter writer, FeedType obj) {
     switch (obj) {
+      case FeedType.BOX:
+        writer.writeByte(0);
+        break;
+      case FeedType.SCREW:
+        writer.writeByte(1);
+        break;
     }
   }
 
