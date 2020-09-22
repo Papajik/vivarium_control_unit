@@ -33,7 +33,7 @@ class BluetoothHandler {
   Future<bool> _saveToDevice() async {
     if (_device == null) return false;
     List<BluetoothService> services = await _device.discoverServices();
-    services.forEach((service) {
+    for (var service in services){
       if (service.uuid.toString().toUpperCase().substring(4, 8) ==
           BLE_SERVICE) {
         service.characteristics.forEach((characteristic) {
@@ -43,7 +43,7 @@ class BluetoothHandler {
           }
         });
       }
-    });
+    }
     return true;
   }
 
@@ -51,27 +51,6 @@ class BluetoothHandler {
     return _device != null;
   }
 
-  _getDeviceCharacteristic() {
-    print("settings subpage: set characteristic");
-    _device.discoverServices().then((services) => {
-          services.forEach((service) {
-            print(service.uuid);
-            if (service.uuid.toString().toUpperCase().substring(4, 8) ==
-                BLE_SERVICE) {
-              print("settings subpage: characteristics:");
-              service.characteristics.forEach((characteristic) {
-                if (characteristic.uuid
-                        .toString()
-                        .toUpperCase()
-                        .substring(4, 8) ==
-                    BLE_CHARACTERISTIC) {
-                  print(characteristic);
-                }
-              });
-            }
-          })
-        });
-  }
 
   disconnectDevice() async {
     if (_device != null) {

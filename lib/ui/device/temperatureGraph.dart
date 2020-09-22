@@ -1,7 +1,6 @@
 import 'package:charts_flutter/flutter.dart' as charts;
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
-import 'package:settings_ui/settings_ui.dart';
 import 'package:vivarium_control_unit/models/sensorData.dart';
 
 class TemperatureGraph extends StatefulWidget {

@@ -16,7 +16,6 @@ class SettingsFeedTile extends StatefulWidget {
 }
 
 class _SettingsFeedTileState extends State<SettingsFeedTile> {
-  FeedType _type = FeedType.SCREW;
 
   @override
   void initState() {
@@ -25,7 +24,6 @@ class _SettingsFeedTileState extends State<SettingsFeedTile> {
 
   @override
   Widget build(BuildContext context) {
-    List<String> t;
     return Container(
         height: 80,
         child: Row(
