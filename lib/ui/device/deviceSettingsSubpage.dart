@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_blue/flutter_blue.dart';
 import 'package:flutter_settings_screens/flutter_settings_screens.dart'
     as SettingsScreen;
 import 'package:vivarium_control_unit/Constants.dart';

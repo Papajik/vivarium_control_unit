@@ -161,7 +161,7 @@ class SettingsConverter {
   }
 
   Uint8List settingsToByteArray() {
-    Uint8List.fromList([1,2]);
+    return Uint8List.fromList([1,2]);
   }
 
 

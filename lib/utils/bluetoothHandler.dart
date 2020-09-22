@@ -55,6 +55,7 @@ class BluetoothHandler {
       await bluetoothDevice.disconnect();
       setDevice(null);
     }
+    disconnectDevices();
     _isConnecting = false;
   }
 
@@ -128,4 +129,11 @@ class BluetoothHandler {
   }
 
   void sendData() {}
+
+  Future<void> disconnectDevices() async {
+    var connectedDevices = await flutterBlue.connectedDevices;
+    for (var d in connectedDevices){
+      d.disconnect();
+    }
+  }
 }
