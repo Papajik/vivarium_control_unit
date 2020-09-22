@@ -6,11 +6,11 @@ import 'package:hive/hive.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:vivarium_control_unit/models/feedTrigger.dart';
 import 'package:vivarium_control_unit/models/ledTrigger.dart';
+import 'package:vivarium_control_unit/models/waterHeaterType.dart';
 import 'package:vivarium_control_unit/utils/hiveBoxes.dart';
 
 class HiveCache extends CacheProvider {
   Box _preferences;
-
 
   @override
   Future<void> init() async {
@@ -21,10 +21,11 @@ class HiveCache extends CacheProvider {
       ..init(dir.path)
       ..registerAdapter(FeedTypeAdapter())
       ..registerAdapter(LedTriggerAdapter())
-      ..registerAdapter(FeedTriggerAdapter());
+      ..registerAdapter(FeedTriggerAdapter())
+      ..registerAdapter(HeaterTypeAdapter());
 
     _preferences = await Hive.openBox(HiveBoxes.mainBox);
-    _preferences.clear();
+    _preferences.clear(); //TODO remove clear line
   }
 
   @override
@@ -59,7 +60,6 @@ class HiveCache extends CacheProvider {
 
   @override
   T getValue<T>(String key, T defaultValue) {
-    print(key);
     var value = _preferences.get(key);
     if (value is T) {
       return value;
