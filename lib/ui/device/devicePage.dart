@@ -1,5 +1,8 @@
+import 'dart:async';
+
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_blue/flutter_blue.dart' as FlutterBlue;
 import 'package:flutter_bluetooth_serial/flutter_bluetooth_serial.dart';
 import 'package:hive/hive.dart';
 import 'package:vivarium_control_unit/Constants.dart';
@@ -24,6 +27,8 @@ class DevicePage extends StatefulWidget {
 
 class _DevicePage extends State<DevicePage> {
   BluetoothHandler _bluetoothHandler;
+  StreamSubscription<BluetoothState> subscription;
+
 
   @override
   void initState() {
@@ -32,9 +37,8 @@ class _DevicePage extends State<DevicePage> {
         BluetoothHandler(widget.device.macAddress, widget.device.name);
 
     ///Whenever is bluetooth state changed, rebuild widget
-    FlutterBluetoothSerial.instance
-        .onStateChanged()
-        .listen((BluetoothState state) {
+    subscription =  FlutterBluetoothSerial.instance
+        .onStateChanged().listen((BluetoothState state) {
       setState(() {});
     });
   }
@@ -42,7 +46,8 @@ class _DevicePage extends State<DevicePage> {
   @override
   void dispose() {
     _bluetoothHandler.disconnectDevice();
-    _bluetoothHandler.closeStateStream();
+  //  _bluetoothHandler.closeBroadcast();
+    subscription.cancel();
     super.dispose();
   }
 
@@ -98,12 +103,6 @@ class _DevicePage extends State<DevicePage> {
         builder: (context, snapshot) {
           print("change of bluetooth state");
           print(snapshot.data);
-          if (snapshot.data == BluetoothState.UNKNOWN) {
-            return IconButton(
-              icon: Icon(Icons.bluetooth),
-              onPressed: null,
-            );
-          }
           if (!(snapshot.data == BluetoothState.STATE_ON ||
               snapshot.data == BluetoothState.STATE_BLE_ON)) {
             return IconButton(
@@ -116,30 +115,28 @@ class _DevicePage extends State<DevicePage> {
   }
 
   buildConnectButton(BuildContext context) {
+    print("building connection button");
     return StreamBuilder(
-      stream: _bluetoothHandler.state(),
+      stream: _bluetoothHandler.device(),
       builder: (context, snapshot) {
         print(snapshot.data);
-        if (snapshot.data == HandlerState.CONNECTED) {
-          return IconButton(
-            icon: Icon(Icons.link_off, color: Colors.orange),
-            onPressed: () async {
-              await _bluetoothHandler.disconnectDevice();
-              setState(() {});
-            },
-          );
-        }
-        if (snapshot.data == HandlerState.DISCONNECTED) {
+        if (!snapshot.hasData){
           return IconButton(
             icon: Icon(Icons.insert_link, color: Colors.white),
             onPressed: _bluetoothHandler.isConnecting()
                 ? null
                 : () async {
-                    _bluetoothHandler.connectDevice();
-                  },
+              _bluetoothHandler.connectDevice();
+            },
           );
         }
-        return IconButton(icon: Icon(Icons.error_outline_sharp), onPressed: null);
+        return IconButton(
+          icon: Icon(Icons.link_off, color: Colors.orange),
+          onPressed: () async {
+            await _bluetoothHandler.disconnectDevice();
+            setState(() {});
+          },
+        );
       },
     );
   }

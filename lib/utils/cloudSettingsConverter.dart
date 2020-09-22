@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:typed_data';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:hive/hive.dart';
@@ -157,6 +158,10 @@ class SettingsConverter {
   String getValueFromBox(String s) {
     Box mainBox = Hive.box(HiveBoxes.mainBox);
     return mainBox.get(s).toString();
+  }
+
+  Uint8List settingsToByteArray() {
+    Uint8List.fromList([1,2]);
   }
 
 
