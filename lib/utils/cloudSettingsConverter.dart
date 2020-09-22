@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'dart:convert';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:hive/hive.dart';
@@ -12,8 +11,16 @@ const String WATER_LEVEL_SENSOR_HEIGHT = "settings.waterSensorHeight";
 const String WATER_LEVEL_MAX_HEIGHT = "settings.maxWaterHeight";
 const String WATER_LEVEL_MIN_HEIGHT = "settings.minWaterHeight";
 const String FEED_TRIGGERS = "settings.feedTriggers";
-const String LED_CURRENT_COLOR = "-led-current-color";
-const String LED_IS_ON = "-led-is-on";
+const String LED_TRIGGERS = "settings.ledTriggers";
+const String LED_COLOR = "settings.ledColor";
+const String LED_ON = "settings.ledOn";
+const String WATER_OPTIMAL_TEMPERATURE = "settings.waterOptimalTemperature";
+const String WATER_HEATER_TYPE = "settings.waterHeaterType";
+const String WATER_MAX_PH = "settings.waterMaxPh";
+const String WATER_MIN_PH = "settings.waterMinPh";
+const String POWER_OUTLET_ONE_ON = "settings.powerOutletOneIsOn";
+const String POWER_OUTLET_TWO_ON = "settings.powerOutletTwoIsOn";
+
 
 class SettingsConverter {
   final String deviceId;
@@ -21,7 +28,7 @@ class SettingsConverter {
 
   SettingsConverter({this.deviceId, this.userId});
 
-  Future<void> loadSettingsFromCloud() async {
+  Future<bool> loadSettingsFromCloud() async {
     var docRef = FirebaseFirestore.instance
         .collection("users")
         .doc(userId)
@@ -36,6 +43,7 @@ class SettingsConverter {
     print(settingsObject.feedTriggers);
     print(settingsObject.ledTriggers);
     await updateCache(settingsObject);
+    return true;
   }
 
   updateCache(SettingsObject settingsObject) async {
@@ -67,11 +75,20 @@ class SettingsConverter {
     Box mainBox = Hive.box(HiveBoxes.mainBox);
     print("previous");
     print(mainBox.values);
-    print(settingsObject.waterSensorHeight);
+    print(settingsObject.waterHeaterType);
     await mainBox.clear();
     await mainBox.put(deviceId + WATER_LEVEL_SENSOR_HEIGHT, settingsObject.waterSensorHeight);
     await mainBox.put(deviceId + WATER_LEVEL_MIN_HEIGHT, settingsObject.minWaterHeight);
     await mainBox.put(deviceId + WATER_LEVEL_MAX_HEIGHT, settingsObject.maxWaterHeight);
+    await mainBox.put(deviceId + WATER_HEATER_TYPE, settingsObject.waterHeaterType);
+    await mainBox.put(deviceId + WATER_OPTIMAL_TEMPERATURE, settingsObject.waterOptimalTemperature);
+    await mainBox.put(deviceId + LED_ON, settingsObject.ledOn);
+    await mainBox.put(deviceId + LED_COLOR, settingsObject.ledColor);
+    await mainBox.put(deviceId + POWER_OUTLET_ONE_ON, settingsObject.powerOutletOneIsOn);
+    await mainBox.put(deviceId + POWER_OUTLET_TWO_ON, settingsObject.powerOutletTwoIsOn);
+    await mainBox.put(deviceId + WATER_MAX_PH, settingsObject.waterMaxPh);
+    await mainBox.put(deviceId + WATER_MIN_PH, settingsObject.waterMinPh);
+
     print("after:");
     print(mainBox.values);
 
@@ -118,10 +135,6 @@ class SettingsConverter {
     return docRef.update(
       {"settings.feedTriggers": tt.map((e) => e.toJson()).toList()}
     );
-
-    return docRef.update({
-      "settings": object.toJson()
-    });
   }
 
   List<FeedTrigger> getFeedTriggers(){
@@ -130,7 +143,7 @@ class SettingsConverter {
     return feedTriggers.values.toList();
   }
 
-  saveItemToCloud(String key, dynamic value) async{
+  saveItemToCloud(String key, dynamic value) async{//TODO add logic on failed update
     var docRef = FirebaseFirestore.instance
         .collection("users")
         .doc(userId)
@@ -143,8 +156,6 @@ class SettingsConverter {
 
   String getValueFromBox(String s) {
     Box mainBox = Hive.box(HiveBoxes.mainBox);
-    print("get value from box:");
-    print(s);
     return mainBox.get(s).toString();
   }
 
