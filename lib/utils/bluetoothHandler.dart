@@ -10,8 +10,10 @@ FlutterBlue flutterBlue = FlutterBlue.instance;
 
 class BluetoothHandler {
   StreamSubscription<BluetoothDeviceState> bluetoothStateSubscription;
+  StreamSubscription<List<int>> characteristicValueStreamSubscription;
 
   BluetoothDevice bluetoothDevice;
+  BluetoothCharacteristic _characteristic;
   String macAddress;
   String name;
 
@@ -27,33 +29,56 @@ class BluetoothHandler {
     this.macAddress = macAddress;
   }
 
-  setDevice(BluetoothDevice device) {
+  setDevice(BluetoothDevice device) async {
     print("setting device = $device");
     bluetoothDevice = device;
+    if (device != null) {
+      _characteristic = await findCharacteristic();
+      if (_characteristic != null) print("characteristic is set");
+      characteristicValueStreamSubscription =
+          _characteristic?.value?.listen((event) {
+        print("code from arduino = $event");
+      });
+    } else {
+      await characteristicValueStreamSubscription?.cancel();
+    }
     _deviceController.add(bluetoothDevice);
   }
 
   Future<bool> saveToDeviceDirectly(Uint8List byteArray) async {
+
+
     if (bluetoothDevice == null) return false;
-    List<BluetoothService> services = await bluetoothDevice.discoverServices();
-    for (var service in services) {
-      if (service.uuid.toString().toUpperCase().substring(4, 8) ==
-          BLE_SERVICE) {
-        service.characteristics.forEach((characteristic) {
-          if (characteristic.uuid.toString().toUpperCase().substring(4, 8) ==
-              BLE_CHARACTERISTIC) {
-              sendData();
-          }
-        });
-      }
+    await _characteristic.write([1]);
+    await _characteristic.write(byteArray);
+    await Future.delayed(Duration(seconds: 2));
+   // await _characteristic.write(byteArray.getRange(0, 60).toList());
+    //_characteristic.write(byteArray.getRange(0, 10).toList());
+    //await Future.delayed(Duration(seconds: 3));
+    //_characteristic.write(byteArray.getRange(10, 67).toList());
+    return true;
+
+    int length = byteArray.length;
+    print("Length = $length");
+    int index = 0;
+    int bufferSize = 10;
+    while (index < length-bufferSize){
+      Iterable subset = byteArray.getRange(index, index+bufferSize);
+      print("sending  =  $subset");
+      _characteristic.write(byteArray);
+      await Future.delayed(Duration(milliseconds: 1000));
+      index+=bufferSize;
     }
+
+
+    _characteristic.write(byteArray.getRange(index, length));
     return true;
   }
 
   disconnectDevice() async {
     if (bluetoothDevice != null) {
       await bluetoothDevice.disconnect();
-      setDevice(null);
+      await setDevice(null);
     }
     disconnectDevices();
     _isConnecting = false;
@@ -80,7 +105,7 @@ class BluetoothHandler {
     print("Connected devices = $devices");
     for (var d in devices) {
       if (d.id == identifier) {
-        setDevice(d);
+        await setDevice(d);
         _isConnecting = false;
         setDeviceStateListener();
         return true;
@@ -101,14 +126,14 @@ class BluetoothHandler {
               if (r.device.id == identifier) {
                 r.device
                     .connect(autoConnect: false, timeout: Duration(seconds: 4))
-                    .then((value) => {
+                    .then((value) async => {
                           print("bluetoothHandler connected"),
                           //TODO add toast - connected
-                          setDevice(r.device),
+                          await setDevice(r.device),
                           _isConnecting = false,
                           _subscription.cancel(),
                           _subscription = null,
-                          setDeviceStateListener()
+                          await setDeviceStateListener()
                         });
               }
             }
@@ -118,22 +143,37 @@ class BluetoothHandler {
         });
   }
 
-  setDeviceStateListener() {
+  setDeviceStateListener() async {
     if (device != null && bluetoothStateSubscription == null)
-      bluetoothStateSubscription = bluetoothDevice.state.listen((event) {
+      bluetoothStateSubscription = bluetoothDevice.state.listen((event) async {
         if (event == BluetoothDeviceState.disconnected) {
-          setDevice(null);
+          await setDevice(null);
           bluetoothStateSubscription.cancel();
         }
       });
   }
 
-  void sendData() {}
-
   Future<void> disconnectDevices() async {
     var connectedDevices = await flutterBlue.connectedDevices;
-    for (var d in connectedDevices){
+    for (var d in connectedDevices) {
       d.disconnect();
     }
+  }
+
+  Future<BluetoothCharacteristic> findCharacteristic() async {
+    List<BluetoothService> services = await bluetoothDevice.discoverServices();
+    for (var service in services) {
+      if (service.uuid.toString().toUpperCase().substring(4, 8) ==
+          BLE_SERVICE) {
+        List<BluetoothCharacteristic> characteristics = service.characteristics;
+        for (var c in characteristics) {
+          if (c.uuid.toString().toUpperCase().substring(4, 8) ==
+              BLE_CHARACTERISTIC) {
+            return c;
+          }
+        }
+      }
+    }
+    return null;
   }
 }

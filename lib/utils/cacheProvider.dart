@@ -14,9 +14,8 @@ class HiveCache extends CacheProvider {
 
   @override
   Future<void> init() async {
-    WidgetsFlutterBinding.ensureInitialized();
     Directory dir = await getApplicationDocumentsDirectory();
-    await Hive.deleteFromDisk();
+
     Hive
       ..init(dir.path)
       ..registerAdapter(FeedTypeAdapter())
@@ -24,8 +23,9 @@ class HiveCache extends CacheProvider {
       ..registerAdapter(FeedTriggerAdapter())
       ..registerAdapter(HeaterTypeAdapter());
 
+
     _preferences = await Hive.openBox(HiveBoxes.mainBox);
-    _preferences.clear(); //TODO remove clear line
+   // _preferences.clear();
   }
 
   @override
