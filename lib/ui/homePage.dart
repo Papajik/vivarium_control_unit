@@ -101,7 +101,7 @@ class _LoginPageState extends State<HomePage> {
           BottomNavigationBarItem(
               icon: Icon(Icons.settings),
               title: Text("Settings"),
-              backgroundColor: Colors.blue)
+              backgroundColor: Colors.blue),
         ],
         onTap: _onTap,
         iconSize: 30,
