@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:vivarium_control_unit/models/feedTrigger.dart';
 import 'package:vivarium_control_unit/ui/device/feedTriggerDialog.dart';
+import 'package:vivarium_control_unit/utils/convertors.dart';
 
 class SettingsFeedTile extends StatefulWidget {
   @required
@@ -108,8 +109,8 @@ class _SettingsFeedTileState extends State<SettingsFeedTile> {
   }
 
   String getWidgetTime() {
-    String lsHour = widget.trigger.dateTime.hour.toString().padLeft(2, '0');
-    String lsMinute = widget.trigger.dateTime.minute.toString().padLeft(2, '0');
+    String lsHour = getHourFromTime(widget.trigger.time).toString().padLeft(2, '0');
+    String lsMinute = getMinuteFromTime(widget.trigger.time).toString().padLeft(2, '0');
     return lsHour + ":" + lsMinute;
   }
 }

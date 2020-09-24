@@ -2,30 +2,30 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:hive/hive.dart';
 
 part 'ledTrigger.g.dart';
-
+const LED_TRIGGER_LIST_SIZE = 10;
 @HiveType(typeId: 3)
 class LedTrigger extends HiveObject {
   @HiveField(0)
-  DateTime dateTime;
+  int time;
   @HiveField(1)
   int color;
 
   LedTrigger({
-    this.dateTime,
+    this.time,
     this.color,
   });
 
   factory LedTrigger.fromJson(Map<String, dynamic> json) =>
-      LedTrigger(dateTime: json["time"].toDate(), color: json["color"]);
+      LedTrigger(time: json["time"], color: json["color"]);
 
   Map<String, dynamic> toJson() =>
-      {"time": Timestamp.fromDate(dateTime), "color": color};
+      {"time": time, "color": color};
 
   Map<String, dynamic> toMap() {
     return toJson();
   }
 
   String toString() {
-    return '{"time": $dateTime,"color": $color }';
+    return '{"time": $time,"color": $color }';
   }
 }

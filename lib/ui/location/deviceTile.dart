@@ -13,12 +13,11 @@ class DeviceTile extends StatelessWidget {
         title: Text(device.name) ?? Text("Unknown device"),
         subtitle: Builder (
           builder: (context){
-            switch (device.type){
+            switch (getTypeFromIndex(device.type)){
               case Type.AQUARIUM:
                 return Text("Akvarium");
               case Type.TERRARIUM:
                 return Text("Terrarium");
-              case Type.UNKNOWN:
               default:
                 return Text("");
             }
@@ -32,7 +31,7 @@ class DeviceTile extends StatelessWidget {
         ),
         leading: Builder(
           builder: (context) {
-            switch (device.condition) {
+            switch (getConditionFromIndex(device.condition)) {
               case Condition.GREEN:
                 return Icon(Icons.check_circle_outline, color: Colors.green);
                 break;

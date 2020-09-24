@@ -2,6 +2,7 @@ import 'package:date_time_picker/date_time_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:hive/hive.dart';
 import 'package:vivarium_control_unit/models/feedTrigger.dart';
+import 'package:vivarium_control_unit/utils/convertors.dart';
 import 'package:vivarium_control_unit/utils/hiveBoxes.dart';
 
 class FeedTriggerDialog extends StatefulWidget {
@@ -10,7 +11,8 @@ class FeedTriggerDialog extends StatefulWidget {
   @required
   final ValueChanged<String> onChanged;
 
-  const FeedTriggerDialog({Key key, this.deviceId, this.trigger, this.onChanged})
+  const FeedTriggerDialog(
+      {Key key, this.deviceId, this.trigger, this.onChanged})
       : super(key: key);
 
   @override
@@ -18,16 +20,16 @@ class FeedTriggerDialog extends StatefulWidget {
 }
 
 class _FeedTriggerDialogState extends State<FeedTriggerDialog> {
-  FeedType newFeederType = FeedType.BOX;
+  String newFeederType = FeedType.BOX.text;
   String newFeederTime = "00:00";
 
   @override
   void initState() {
     if (widget.trigger != null) {
-      newFeederType = widget.trigger.type;
-      newFeederTime = widget.trigger.dateTime.hour.toString() +
+      newFeederType = getFeedTypeString(widget.trigger.type);
+      newFeederTime = getHourFromTime(widget.trigger.time).toString() +
           ":" +
-          widget.trigger.dateTime.minute.toString();
+          getMinuteFromTime(widget.trigger.time).toString();
     }
     super.initState();
   }
@@ -49,12 +51,12 @@ class _FeedTriggerDialogState extends State<FeedTriggerDialog> {
                 });
               },
               icon: Icon(Icons.access_time)),
-          DropdownButton<FeedType>(
+          DropdownButton<String>(
             //TODO parse enums to readable strings
             value: newFeederType,
             items: FeedType.values.map((FeedType feedType) {
-              return DropdownMenuItem<FeedType>(
-                  value: feedType, child: Text(feedType.toString()));
+              return DropdownMenuItem<String>(
+                  value: feedType.text, child: Text(feedType.toString()));
             }).toList(),
             onChanged: (value) {
               setState(() {
@@ -78,9 +80,8 @@ class _FeedTriggerDialogState extends State<FeedTriggerDialog> {
             var t = newFeederTime.split(":");
 
             if (widget.trigger != null) {
-              widget.trigger.dateTime =
-                  DateTime(2000, 1, 1, int.parse(t[0]), int.parse(t[1]));
-              widget.trigger.type = newFeederType;
+              widget.trigger.time = getTime(int.parse(t[0]), int.parse(t[1]));
+              widget.trigger.type = getIndexOfFeedType(newFeederType);
               await widget.trigger.save();
               print("saved");
               widget.onChanged("");
@@ -88,11 +89,10 @@ class _FeedTriggerDialogState extends State<FeedTriggerDialog> {
               return;
             } else {
               Box<FeedTrigger> box =
-              Hive.box(HiveBoxes.feedTriggerList + widget.deviceId);
+                  Hive.box(HiveBoxes.feedTriggerList + widget.deviceId);
               await box.add(FeedTrigger(
-                  type: newFeederType,
-                  dateTime:
-                  DateTime(2000, 1, 1, int.parse(t[0]), int.parse(t[1]))));
+                  type: getIndexOfFeedType(newFeederType),
+                  time: getTime(int.parse(t[0]), int.parse(t[1]))));
             }
             widget.onChanged("");
             Navigator.pop(context);

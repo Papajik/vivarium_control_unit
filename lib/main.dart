@@ -1,3 +1,4 @@
+  import 'package:flamingo/flamingo.dart' as Flamingo;
 import 'package:flutter/material.dart';
 import 'package:flutter_settings_screens/flutter_settings_screens.dart';
 import 'package:vivarium_control_unit/Constants.dart';
@@ -10,6 +11,7 @@ void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp();
   await Settings.init(cacheProvider: HiveCache());
+  await Flamingo.Flamingo.initializeApp();
   runApp(Constants(
     child: MyApp(),
   ));

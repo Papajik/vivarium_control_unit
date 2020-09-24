@@ -28,9 +28,8 @@ class DeviceList extends StatelessWidget {
         }
         return new ListView(
           children: snapshot.data.docs.map((document) {
-            print(document.data);
             return DeviceTile(
-              device: Device.fromJSON(document.data()),
+              device:Device.fromJSON(document.data()),
             );
           }).toList(),
         );

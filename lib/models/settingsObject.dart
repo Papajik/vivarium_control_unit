@@ -1,14 +1,29 @@
-//import 'package:vivarium_control_unit/models/additionalInfo.dart';
-
 import 'package:vivarium_control_unit/models/feedTrigger.dart';
 import 'package:vivarium_control_unit/models/ledTrigger.dart';
 import 'package:vivarium_control_unit/models/waterHeaterType.dart';
 
 //TODO use https://pub.dev/packages/flamingo
-//https://github.com/icemanbsi/flutter_time_picker_spinner
-//https://pub.dev/packages/flutter_time_picker_spinner
 
-class SettingsObject {
+enum SettingsObjectKey {
+  ledOn,
+  ledColor,
+  maxWaterHeight,
+  minWaterHeight,
+  powerOutletOneIsOn,
+  powerOutletTwoIsOn,
+  waterHeaterType,
+  waterMinPh,
+  waterMaxPh,
+  waterOptimalTemperature,
+  waterSensorHeight,
+  feedTriggers,
+  ledTriggers,
+}
+
+
+
+
+class SettingsObject  {
   ///water level
 
   int waterSensorHeight;
@@ -28,7 +43,7 @@ class SettingsObject {
   ///Water temperature
 
   double waterOptimalTemperature;
-  HeaterType waterHeaterType;
+  int waterHeaterType;
 
   ///PH
   double waterMaxPh;
@@ -37,6 +52,8 @@ class SettingsObject {
   ///Outlets
   bool powerOutletOneIsOn;
   bool powerOutletTwoIsOn;
+
+
 
   SettingsObject(
       {this.feedTriggers,
@@ -64,8 +81,8 @@ class SettingsObject {
           maxWaterHeight: data['maxWaterHeight'] as int,
           minWaterHeight: data['minWaterHeight'] as int,
           waterSensorHeight: data['waterSensorHeight'] as int,
-          waterHeaterType: HeaterType.values
-              .firstWhere((e) => e.toString() == data['waterHeaterType']),
+          //waterHeaterType: HeaterType.values.firstWhere((e) => e.toString() == data['waterHeaterType']),
+          waterHeaterType: data['waterHeaterType'] as int,
           ledColor: data['ledColor'] as int,
           ledOn: data['ledOn'] as bool,
           waterOptimalTemperature: data['waterOptimalTemperature'] as double,
@@ -76,10 +93,20 @@ class SettingsObject {
         );
 
   Map<String, dynamic> toJson() => {
-    'maxWaterHeight': maxWaterHeight,
-    'minWaterHeight': minWaterHeight,
-    'waterSensorHeight': waterSensorHeight
-  };
+    'ledOn':ledOn,
+    'ledColor':ledColor,
+    'maxWaterHeight':maxWaterHeight,
+    'minWaterHeight':minWaterHeight,
+    'powerOutletOneIsOn':powerOutletOneIsOn,
+    'powerOutletTwoIsOn':powerOutletTwoIsOn,
+    'waterHeaterType':waterHeaterType,
+    'waterMinPh':waterMinPh,
+    'waterMaxPh':waterMaxPh,
+    'waterOptimalTemperature':waterOptimalTemperature,
+    'waterSensorHeight':waterSensorHeight,
+    'feedTriggers':feedTriggers.map((e) => e.toJson()),
+    'ledTriggers':ledTriggers.map((e) => e.toJson()),
+      };
 
   SettingsObject.newEmpty()
       : this(feedTriggers: new List(), ledTriggers: new List());

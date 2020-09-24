@@ -56,8 +56,8 @@ class FeedTriggerAdapter extends TypeAdapter<FeedTrigger> {
       for (int i = 0; i < numOfFields; i++) reader.readByte(): reader.read(),
     };
     return FeedTrigger(
-      dateTime: fields[1] as DateTime,
-      type: fields[0] as FeedType,
+      time: fields[1] as int,
+      type: fields[0] as int,
     );
   }
 
@@ -68,7 +68,7 @@ class FeedTriggerAdapter extends TypeAdapter<FeedTrigger> {
       ..writeByte(0)
       ..write(obj.type)
       ..writeByte(1)
-      ..write(obj.dateTime);
+      ..write(obj.time);
   }
 
   @override

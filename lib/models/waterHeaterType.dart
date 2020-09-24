@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:hive/hive.dart';
 
 part 'waterHeaterType.g.dart';
@@ -9,3 +10,11 @@ enum HeaterType {
   @HiveField(1)
   AUTO
 }
+
+extension HeaterTypeExtension on HeaterType{
+  String get text => describeEnum(this);
+}
+
+
+String getHeaterTypeString(index) => HeaterType.values[index].text;
+int getIndexOfHeaterTypeFromString(name) => HeaterType.values.firstWhere((element) => element.text == name).index;

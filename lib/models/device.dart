@@ -1,3 +1,6 @@
+import 'package:flutter/foundation.dart';
+import 'package:flutter/material.dart';
+import 'package:vivarium_control_unit/Constants.dart';
 import 'package:vivarium_control_unit/models/camera.dart';
 
 import 'sensorData.dart';
@@ -5,12 +8,28 @@ import 'sensorData.dart';
 enum Condition { GREEN, YELLOW, RED, UNKNOWN }
 enum Type { AQUARIUM, TERRARIUM, UNKNOWN }
 
+extension ConditionExtension on Condition{
+  String get name => describeEnum(this);
+}
+
+extension TypeExtension on Type{
+  String get name => describeEnum(this);
+}
+
+Condition getConditionFromIndex(int index) => Condition.values[index];
+
+Type getTypeFromIndex(index) => Type.values[index];
+
+
+
+
+
 class Device {
   final String id;
   final String name;
   final String location;
-  final Condition condition;
-  final Type type;
+  final int condition;
+  final int type;
   final SensorData sensorValues;
   final String macAddress;
   final Camera camera;
@@ -28,23 +47,32 @@ class Device {
     this.camera
   });
 
+
   Device.fromJSON(Map<String, dynamic> data)
       : this(
             id: data['info']['id'],
             name: data['info']['name'],
             location: data['info']['location'],
-            condition: (data.containsKey('info') &&
-                    data['info'].containsKey('condition'))
-                ? Condition.values[data['info']['condition']]
-                : Condition.UNKNOWN,
-            type: (data.containsKey('info') && data['info'].containsKey('type'))
-                ? Type.values.firstWhere((e) => e.toString()==data['info']['type'])
-                : Type.UNKNOWN,
+            condition: data['info']['condition'],
+            type: data['info']['type'],
             sensorValues: SensorData.fromJSON(
                 new Map<String, dynamic>.from(data['sensorValues'])),
             macAddress: data['info']['macAddress'],
             camera: Camera.fromJSON(data['camera'])
   );
+
+  Map<String, dynamic> toJson() => {
+    'info':{
+      'id':id,
+      'name':name,
+      'location':location,
+      'condition':condition,
+      'type':type,
+      'macAddress': macAddress
+    },
+    'sensorValues':sensorValues.toJson(),
+    'camera':camera.toJson()
+  };
 }
 
 

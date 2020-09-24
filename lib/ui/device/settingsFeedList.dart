@@ -35,7 +35,7 @@ class _SettingsFeedListState extends State<SettingsFeedList> {
         List<Widget> widgets = new List<Widget>();
         List<FeedTrigger>  list = box.values.toList();
         list.sort((a,b)=>
-          a.dateTime.compareTo(b.dateTime)
+          a.time.compareTo(b.time)
         );
 
         list.forEach((element) {

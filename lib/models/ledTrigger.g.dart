@@ -17,7 +17,7 @@ class LedTriggerAdapter extends TypeAdapter<LedTrigger> {
       for (int i = 0; i < numOfFields; i++) reader.readByte(): reader.read(),
     };
     return LedTrigger(
-      dateTime: fields[0] as DateTime,
+      time: fields[0] as int,
       color: fields[1] as int,
     );
   }
@@ -27,7 +27,7 @@ class LedTriggerAdapter extends TypeAdapter<LedTrigger> {
     writer
       ..writeByte(2)
       ..writeByte(0)
-      ..write(obj.dateTime)
+      ..write(obj.time)
       ..writeByte(1)
       ..write(obj.color);
   }
