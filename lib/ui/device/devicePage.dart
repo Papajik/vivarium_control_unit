@@ -28,7 +28,6 @@ class _DevicePage extends State<DevicePage> {
   BluetoothHandler _bluetoothHandler;
   StreamSubscription<BluetoothState> subscription;
 
-
   @override
   void initState() {
     super.initState();
@@ -36,8 +35,9 @@ class _DevicePage extends State<DevicePage> {
         BluetoothHandler(widget.device.macAddress, widget.device.name);
 
     ///Whenever is bluetooth state changed, rebuild widget
-    subscription =  FlutterBluetoothSerial.instance
-        .onStateChanged().listen((BluetoothState state) {
+    subscription = FlutterBluetoothSerial.instance
+        .onStateChanged()
+        .listen((BluetoothState state) {
       setState(() {});
     });
   }
@@ -45,7 +45,6 @@ class _DevicePage extends State<DevicePage> {
   @override
   void dispose() {
     _bluetoothHandler.disconnectDevice();
-  //  _bluetoothHandler.closeBroadcast();
     subscription.cancel();
     super.dispose();
   }
@@ -100,8 +99,6 @@ class _DevicePage extends State<DevicePage> {
     return FutureBuilder<BluetoothState>(
         future: FlutterBluetoothSerial.instance.state,
         builder: (context, snapshot) {
-          print("change of bluetooth state");
-          print(snapshot.data);
           if (!(snapshot.data == BluetoothState.STATE_ON ||
               snapshot.data == BluetoothState.STATE_BLE_ON)) {
             return IconButton(
@@ -114,19 +111,17 @@ class _DevicePage extends State<DevicePage> {
   }
 
   buildConnectButton(BuildContext context) {
-    print("building connection button");
     return StreamBuilder(
       stream: _bluetoothHandler.device(),
       builder: (context, snapshot) {
-        print(snapshot.data);
-        if (!snapshot.hasData){
+        if (!snapshot.hasData) {
           return IconButton(
             icon: Icon(Icons.insert_link, color: Colors.white),
             onPressed: _bluetoothHandler.isConnecting()
                 ? null
                 : () async {
-              _bluetoothHandler.connectDevice();
-            },
+                    _bluetoothHandler.connectDevice();
+                  },
           );
         }
         return IconButton(
@@ -141,9 +136,12 @@ class _DevicePage extends State<DevicePage> {
   }
 
   _initializeHive() async {
+  //  await Hive.deleteBoxFromDisk(HiveBoxes.ledTriggerList + widget.device.id);
+  //  await Hive.deleteBoxFromDisk(HiveBoxes.feedTriggerList + widget.device.id);
     await Hive.openBox<FeedTrigger>(
         HiveBoxes.feedTriggerList + widget.device.id);
-    await Hive.openBox<LedTrigger>(HiveBoxes.ledTriggerList + widget.device.id);
+    await Hive.openBox<LedTrigger>(
+        HiveBoxes.ledTriggerList + widget.device.id);
     return true;
   }
 }
