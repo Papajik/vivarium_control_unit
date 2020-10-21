@@ -6,6 +6,7 @@ import 'package:hive/hive.dart';
 import 'package:vivarium_control_unit/models/feedTrigger.dart';
 import 'package:vivarium_control_unit/models/ledTrigger.dart';
 import 'package:vivarium_control_unit/models/settingsObject.dart';
+import 'package:vivarium_control_unit/models/waterHeaterType.dart';
 import 'package:vivarium_control_unit/utils/byteArrayBuilder.dart';
 import 'package:vivarium_control_unit/utils/hiveBoxes.dart';
 
@@ -23,18 +24,22 @@ const String WATER_MIN_PH = "settings.waterMinPh";
 const String POWER_OUTLET_ONE_ON = "settings.powerOutletOneIsOn";
 const String POWER_OUTLET_TWO_ON = "settings.powerOutletTwoIsOn";
 
-
 class SettingsConverter {
   final String deviceId;
   final String userId;
   SettingsObject settingsObject;
   Box mainBox = Hive.box(HiveBoxes.mainBox);
+  Box<FeedTrigger> feedTriggersBox;
+  Box<LedTrigger> ledTriggersBox;
 
   SettingsConverter({this.deviceId, this.userId}) {
-
-}
+    feedTriggersBox =
+        Hive.box<FeedTrigger>(HiveBoxes.feedTriggerList + deviceId);
+    ledTriggersBox = Hive.box<LedTrigger>(HiveBoxes.ledTriggerList + deviceId);
+  }
 
   Future<bool> loadSettingsFromCloud() async {
+    //  print("Loading from cloud");
     var docRef = FirebaseFirestore.instance
         .collection("users")
         .doc(userId)
@@ -42,127 +47,131 @@ class SettingsConverter {
         .doc(deviceId);
     var data = await docRef.get();
     var settings = data.data()["settings"];
-    //print(settings);
+    //  print(settings);
     settingsObject =
         SettingsObject.fromJson(Map<String, dynamic>.from(settings));
-    print("object created");
-    //print(settingsObject.feedTriggers);
+    //  print("object created");
+    // print(settingsObject.ledTriggers);
     await updateCache();
+    // print("cache updated");
     return true;
   }
 
   SettingsObject getSettingsObjectFromCache() {
-
     return SettingsObject(
-      ledTriggers: Hive.box<LedTrigger>(HiveBoxes.ledTriggerList + deviceId).values.toList(),
-      feedTriggers: Hive.box<FeedTrigger>(HiveBoxes.feedTriggerList + deviceId).values.toList(),
+      ledTriggers: ledTriggersBox.values.toList(),
+      feedTriggers: feedTriggersBox.values.toList(),
       ledColor: mainBox.get(deviceId + LED_COLOR),
-      ledOn: mainBox.get(deviceId+ LED_ON),
+      ledOn: mainBox.get(deviceId + LED_ON),
       maxWaterHeight: mainBox.get(deviceId + WATER_LEVEL_MAX_HEIGHT),
       minWaterHeight: mainBox.get(deviceId + WATER_LEVEL_MIN_HEIGHT),
-      powerOutletOneIsOn:  mainBox.get(deviceId + POWER_OUTLET_ONE_ON),
-      powerOutletTwoIsOn:  mainBox.get(deviceId + POWER_OUTLET_TWO_ON),
-      waterHeaterType: mainBox.get(deviceId + WATER_HEATER_TYPE),
+      powerOutletOneIsOn: mainBox.get(deviceId + POWER_OUTLET_ONE_ON),
+      powerOutletTwoIsOn: mainBox.get(deviceId + POWER_OUTLET_TWO_ON),
+      waterHeaterType:
+          getHeaterTypeByName(mainBox.get(deviceId + WATER_HEATER_TYPE)),
       waterMaxPh: mainBox.get(deviceId + WATER_MAX_PH),
       waterMinPh: mainBox.get(deviceId + WATER_MIN_PH),
-      waterOptimalTemperature: mainBox.get(deviceId + WATER_OPTIMAL_TEMPERATURE),
+      waterOptimalTemperature:
+          mainBox.get(deviceId + WATER_OPTIMAL_TEMPERATURE),
       waterSensorHeight: mainBox.get(deviceId + WATER_LEVEL_SENSOR_HEIGHT),
     );
   }
 
   updateCache() async {
-   // print("settings converter - update cache");
+    // print("settings converter - update cache");
+//    print("update cache");
     await updateFeedTriggers();
+//    print("updateFeedTriggers updated");
     await updateLedTriggers();
+//    print("updateLedTriggers updated");
     await updateMainBox();
+//    print("updateMainBox updated");
     return;
   }
 
-  updateLedTriggers() async{
-    Box<LedTrigger> ledTriggersBox =
-    Hive.box<LedTrigger>(HiveBoxes.ledTriggerList + deviceId);
+  updateLedTriggers() async {
     await ledTriggersBox.clear();
     await ledTriggersBox.addAll(settingsObject.ledTriggers);
     return true;
   }
 
-  updateFeedTriggers() async{
-    Box<FeedTrigger> feedTriggersBox =
-    Hive.box<FeedTrigger>(HiveBoxes.feedTriggerList + deviceId);
-
+  updateFeedTriggers() async {
+//    print("Update feed triggers inside");
+//    print(feedTriggersBox.values);
     await feedTriggersBox.clear();
     await feedTriggersBox.addAll(settingsObject.feedTriggers);
     return true;
   }
 
-  updateMainBox() async{
-    Box mainBox = Hive.box(HiveBoxes.mainBox);
-  //  print("previous");
-    //print(mainBox.values);
-   // print(settingsObject.waterHeaterType);
+  updateMainBox() async {
+    //print("updateMainBox");
+    //print("heatertype = ${settingsObject.waterHeaterType.text}");
     await mainBox.clear();
-    await mainBox.put(deviceId + WATER_LEVEL_SENSOR_HEIGHT, settingsObject.waterSensorHeight);
-    await mainBox.put(deviceId + WATER_LEVEL_MIN_HEIGHT, settingsObject.minWaterHeight);
-    await mainBox.put(deviceId + WATER_LEVEL_MAX_HEIGHT, settingsObject.maxWaterHeight);
-    await mainBox.put(deviceId + WATER_HEATER_TYPE, settingsObject.waterHeaterType);
-    await mainBox.put(deviceId + WATER_OPTIMAL_TEMPERATURE, settingsObject.waterOptimalTemperature);
+    await mainBox.put(
+        deviceId + WATER_LEVEL_SENSOR_HEIGHT, settingsObject.waterSensorHeight);
+    await mainBox.put(
+        deviceId + WATER_LEVEL_MIN_HEIGHT, settingsObject.minWaterHeight);
+    await mainBox.put(
+        deviceId + WATER_LEVEL_MAX_HEIGHT, settingsObject.maxWaterHeight);
+    await mainBox.put(
+        deviceId + WATER_HEATER_TYPE, settingsObject.waterHeaterType.text);
+    await mainBox.put(deviceId + WATER_OPTIMAL_TEMPERATURE,
+        settingsObject.waterOptimalTemperature);
     await mainBox.put(deviceId + LED_ON, settingsObject.ledOn);
     await mainBox.put(deviceId + LED_COLOR, settingsObject.ledColor);
-    await mainBox.put(deviceId + POWER_OUTLET_ONE_ON, settingsObject.powerOutletOneIsOn);
-    await mainBox.put(deviceId + POWER_OUTLET_TWO_ON, settingsObject.powerOutletTwoIsOn);
+    await mainBox.put(
+        deviceId + POWER_OUTLET_ONE_ON, settingsObject.powerOutletOneIsOn);
+    await mainBox.put(
+        deviceId + POWER_OUTLET_TWO_ON, settingsObject.powerOutletTwoIsOn);
     await mainBox.put(deviceId + WATER_MAX_PH, settingsObject.waterMaxPh);
     await mainBox.put(deviceId + WATER_MIN_PH, settingsObject.waterMinPh);
 
-  //  print("after:");
-  //  print(mainBox.values);
+    //  print("after:");
+    //  print(mainBox.values);
 
     return true;
   }
 
-
-
-
-  List<FeedTrigger> getFeedTriggers(){
-    Box<FeedTrigger> feedTriggers =
-    Hive.box(HiveBoxes.feedTriggerList + deviceId);
-    return feedTriggers.values.toList();
+  List<FeedTrigger> getFeedTriggers() {
+    //Box<FeedTrigger> feedTriggers =        Hive.box(HiveBoxes.feedTriggerList + deviceId);
+    return feedTriggersBox.values.toList();
   }
 
-  saveItem(String key, dynamic value) async{
+  List<LedTrigger> getLedTriggers() {
+    return ledTriggersBox.values.toList();
+  }
+
+  saveItem(String key, dynamic value) async {
     await saveItemToCloud(key, value);
-    await saveToCache(deviceId+key, value);
+    await saveToCache(deviceId + key, value);
   }
 
-  saveToCache(String key, dynamic value) async{
+  saveToCache(String key, dynamic value) async {
     print("Saving $key = $value");
     await mainBox.put(key, value);
     print(mainBox.toMap());
-
   }
 
-  saveItemToCloud(String key, dynamic value) async{//TODO add logic on failed update
+  saveItemToCloud(String key, dynamic value) async {
+    //TODO add logic on failed update
     print("save to cloud key = $key, value = $value");
     var docRef = FirebaseFirestore.instance
         .collection("users")
         .doc(userId)
         .collection("devices")
         .doc(deviceId);
-    return docRef.update({
-      key: value
-    });
+    return docRef.update({key: value});
   }
 
   String getValueFromBox(String s) {
-    Box mainBox = Hive.box(HiveBoxes.mainBox);
     return mainBox.get(s).toString();
   }
 
   Uint8List settingsToByteArray() {
-  //  print(settingsObject.toJson());
-  //  print(settingsObject.feedTriggers.first.dateTime.millisecondsSinceEpoch);
+    //  print(settingsObject.toJson());
+    //  print(settingsObject.feedTriggers.first.dateTime.millisecondsSinceEpoch);
     SettingsObject settingsObject = getSettingsObjectFromCache();
     ByteArrayBuilder converter = ByteArrayBuilder();
-
 
     converter.setSizeOfObject(settingsObject.toJson());
     converter.addData(settingsObject.ledColor);
@@ -179,17 +188,10 @@ class SettingsConverter {
     converter.addData(settingsObject.feedTriggers);
     converter.addData(settingsObject.ledTriggers);
     print(settingsObject.feedTriggers);
-   // converter.addData(settingsObject.ledTriggers);
-
+    // converter.addData(settingsObject.ledTriggers);
 
     Uint8List l = converter.getDataList();
     print(l);
     return l;
   }
-
-
-
-
-
-
 }

@@ -2,7 +2,7 @@ import 'package:date_time_picker/date_time_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:hive/hive.dart';
 import 'package:vivarium_control_unit/models/feedTrigger.dart';
-import 'package:vivarium_control_unit/utils/convertors.dart';
+import 'package:vivarium_control_unit/utils/converters.dart';
 import 'package:vivarium_control_unit/utils/hiveBoxes.dart';
 
 class FeedTriggerDialog extends StatefulWidget {

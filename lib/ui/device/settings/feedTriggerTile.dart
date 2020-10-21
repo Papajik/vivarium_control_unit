@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:vivarium_control_unit/models/feedTrigger.dart';
-import 'package:vivarium_control_unit/ui/device/feedTriggerDialog.dart';
-import 'package:vivarium_control_unit/utils/convertors.dart';
+import 'package:vivarium_control_unit/ui/device/settings/feedTriggerDialog.dart';
+import 'package:vivarium_control_unit/utils/converters.dart';
 
 class SettingsFeedTile extends StatefulWidget {
   @required
@@ -17,7 +17,6 @@ class SettingsFeedTile extends StatefulWidget {
 }
 
 class _SettingsFeedTileState extends State<SettingsFeedTile> {
-
   @override
   void initState() {
     super.initState();
@@ -94,10 +93,9 @@ class _SettingsFeedTileState extends State<SettingsFeedTile> {
             context: context,
             builder: (BuildContext context) {
               return FeedTriggerDialog(
-                trigger: widget.trigger,
-                deviceId: null,
-                onChanged: widget.onChanged,
-              );
+                  trigger: widget.trigger,
+                  deviceId: null,
+                  onChanged: widget.onChanged);
             });
         break;
       case 'Delete':
@@ -109,8 +107,10 @@ class _SettingsFeedTileState extends State<SettingsFeedTile> {
   }
 
   String getWidgetTime() {
-    String lsHour = getHourFromTime(widget.trigger.time).toString().padLeft(2, '0');
-    String lsMinute = getMinuteFromTime(widget.trigger.time).toString().padLeft(2, '0');
+    String lsHour =
+        getHourFromTime(widget.trigger.time).toString().padLeft(2, '0');
+    String lsMinute =
+        getMinuteFromTime(widget.trigger.time).toString().padLeft(2, '0');
     return lsHour + ":" + lsMinute;
   }
 }

@@ -1,12 +1,14 @@
+import 'dart:ui';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_settings_screens/flutter_settings_screens.dart'
     as SettingsScreen;
 import 'package:vivarium_control_unit/Constants.dart';
 import 'package:vivarium_control_unit/models/waterHeaterType.dart';
-import 'package:vivarium_control_unit/ui/device/settingsFeedList.dart';
+import 'package:vivarium_control_unit/ui/device/settings/feedTriggerList.dart';
+import 'package:vivarium_control_unit/ui/device/settings/ledTriggerList.dart';
 import 'package:vivarium_control_unit/utils/bluetoothHandler.dart';
-import 'package:vivarium_control_unit/utils/cloudSettingsConverter.dart';
-import 'dart:ui';
+import 'package:vivarium_control_unit/utils/settingsConverter.dart';
 
 class DeviceSettingsSubpage extends StatefulWidget {
   final String deviceId;
@@ -31,8 +33,6 @@ class _DeviceSettingsSubpageState extends State<DeviceSettingsSubpage> {
   SettingsConverter _settingsConverter;
   bool sendingToBluetooth = false;
 
-  bool _change = false;
-
   @override
   void initState() {
     super.initState();
@@ -47,8 +47,11 @@ class _DeviceSettingsSubpageState extends State<DeviceSettingsSubpage> {
 
   Widget _createSettingList() {
     return FutureBuilder(
-      future: _settingsConverter.loadSettingsFromCloud(), ///TODO load settings for whole device page, not only settings
+      future: _settingsConverter.loadSettingsFromCloud(),
+
+      ///TODO load settings for whole device page, not only settings
       builder: (context, snapshot) {
+        print("Has data = " + snapshot.hasData.toString());
         if (!snapshot.hasData)
           return Center(
             child: CircularProgressIndicator(),
@@ -65,7 +68,6 @@ class _DeviceSettingsSubpageState extends State<DeviceSettingsSubpage> {
         Expanded(
             child: ListView(
           children: [
-
             _createWaterLevelGroup(),
             _createLedGroup(),
             _createFeederGroup(),
@@ -140,7 +142,7 @@ class _DeviceSettingsSubpageState extends State<DeviceSettingsSubpage> {
           title: "Current color",
           settingKey: widget.deviceId + LED_COLOR + "string",
           onChange: (Color value) async {
-            print("color changed");
+            print("deviceSettingsSubpage - color changed");
             await _settingsConverter.saveItem(LED_COLOR, value.value);
           },
         ),
@@ -153,7 +155,24 @@ class _DeviceSettingsSubpageState extends State<DeviceSettingsSubpage> {
         ),
         SettingsScreen.ExpandableSettingsTile(
           title: "LED Triggers",
-          children: [], //TODO add led triggers list with custom tiles
+          children: [
+            LedTriggerList(
+              deviceId: widget.deviceId,
+              onChanged: (trigger) async {
+                if (trigger != null) {
+                  print(
+                      "deviceSettingsSubpage - ledTriggerList, saving trigger = $trigger");
+                  await trigger.save();
+                  await _settingsConverter.saveItemToCloud(
+                      LED_TRIGGERS,
+                      _settingsConverter
+                          .getLedTriggers()
+                          .map((e) => e.toJson())
+                          .toList());
+                }
+              },
+            )
+          ], //TODO add led triggers list with custom tiles
         )
       ],
     );
@@ -176,7 +195,7 @@ class _DeviceSettingsSubpageState extends State<DeviceSettingsSubpage> {
                         .map((e) => e.toJson())
                         .toList());
                 setState(() {
-                  print("settingsSubpage changing state");
+                  print("deviceSettingsSubpage - changing state");
                 });
               },
             ),
@@ -187,9 +206,6 @@ class _DeviceSettingsSubpageState extends State<DeviceSettingsSubpage> {
   }
 
   _createWaterTemperatureGroup() {
-    print(HeaterType.values.map((e) => e.toString()).toList());
-    print(_settingsConverter
-        .getValueFromBox(widget.deviceId + WATER_HEATER_TYPE));
     return SettingsScreen.SettingsGroup(
       title: "Water temperature",
       children: [
@@ -200,18 +216,22 @@ class _DeviceSettingsSubpageState extends State<DeviceSettingsSubpage> {
           max: 35,
           defaultValue: 15,
           step: 0.1,
-          onChangeEnd: (val) async => await _settingsConverter.saveItem(
-              WATER_OPTIMAL_TEMPERATURE, val),
+          onChangeEnd: (val) async =>
+              await _settingsConverter.saveItem(WATER_OPTIMAL_TEMPERATURE, val),
         ),
         SettingsScreen.SimpleRadioSettingsTile(
             title: "Heater mode",
-            subtitle: "sd",
+            //   subtitle: _settingsConverter.getValueFromBox(widget.deviceId + WATER_HEATER_TYPE).toString(),
             settingKey: widget.deviceId + WATER_HEATER_TYPE,
             selected: _settingsConverter
                 .getValueFromBox(widget.deviceId + WATER_HEATER_TYPE),
             values: HeaterType.values.map((e) => e.text).toList(),
-            onChange: (val) async => await _settingsConverter.saveItem(
-                WATER_HEATER_TYPE, getIndexOfHeaterTypeFromString(val))),
+            onChange: (val) async => {
+                  print("Saving in SimpleRadioSettingsTile, val = $val"),
+                  await _settingsConverter.saveToCache(WATER_HEATER_TYPE, val),
+                  await _settingsConverter.saveItemToCloud(
+                      WATER_HEATER_TYPE, getIndexOfHeaterTypeFromString(val))
+                }),
       ],
     );
   }
@@ -282,16 +302,14 @@ class _DeviceSettingsSubpageState extends State<DeviceSettingsSubpage> {
           settingKey: widget.deviceId + POWER_OUTLET_ONE_ON,
           title: 'Outlet one:',
           onChange: (value) async {
-            await _settingsConverter.saveItem(
-                POWER_OUTLET_ONE_ON, value);
+            await _settingsConverter.saveItem(POWER_OUTLET_ONE_ON, value);
           },
         ),
         SettingsScreen.SwitchSettingsTile(
           settingKey: widget.deviceId + POWER_OUTLET_TWO_ON,
           title: 'Outlet two',
           onChange: (value) async {
-            await _settingsConverter.saveItem(
-                POWER_OUTLET_TWO_ON, value);
+            await _settingsConverter.saveItem(POWER_OUTLET_TWO_ON, value);
           },
         ),
         //TODO add outlets triggers
@@ -303,26 +321,25 @@ class _DeviceSettingsSubpageState extends State<DeviceSettingsSubpage> {
     return StreamBuilder(
       stream: widget.bluetoothHandler.device(),
       builder: (context, snapshot) {
-      //  print("subpage settings - create save button");
-       // print(snapshot.data);
-       // print(widget.bluetoothHandler.bluetoothDevice);
-        if (!snapshot.hasData && widget.bluetoothHandler.bluetoothDevice == null) {
+        //  print("subpage settings - create save button");
+        // print(snapshot.data);
+        // print(widget.bluetoothHandler.bluetoothDevice);
+        if (!snapshot.hasData &&
+            widget.bluetoothHandler.bluetoothDevice == null) {
           return SizedBox.shrink();
         }
 
         return RaisedButton(
-          child: Text("Save settings directly"),
-          onPressed: () async => sendingToBluetooth? null : {
-            sendingToBluetooth = true,
-            await widget.bluetoothHandler.saveToDeviceDirectly(_settingsConverter.settingsToByteArray()),
-            sendingToBluetooth = false
-          }
-
-        );
+            child: Text("Save settings directly"),
+            onPressed: () async => sendingToBluetooth
+                ? null
+                : {
+                    sendingToBluetooth = true,
+                    await widget.bluetoothHandler.saveToDeviceDirectly(
+                        _settingsConverter.settingsToByteArray()),
+                    sendingToBluetooth = false
+                  });
       },
     );
   }
-
-
-
 }
