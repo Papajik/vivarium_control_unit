@@ -11,10 +11,14 @@ enum HeaterType {
   AUTO
 }
 
-extension HeaterTypeExtension on HeaterType{
+extension HeaterTypeExtension on HeaterType {
   String get text => describeEnum(this);
 }
 
+HeaterType getHeaterTypeByName(name) =>
+    HeaterType.values.firstWhere((element) => element.text == name);
 
 String getHeaterTypeString(index) => HeaterType.values[index].text;
-int getIndexOfHeaterTypeFromString(name) => HeaterType.values.firstWhere((element) => element.text == name).index;
+
+int getIndexOfHeaterTypeFromString(name) =>
+    HeaterType.values.firstWhere((element) => element.text == name).index;

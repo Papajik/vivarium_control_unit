@@ -1,6 +1,4 @@
 import 'dart:async';
-
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bluetooth_serial/flutter_bluetooth_serial.dart';
 import 'package:hive/hive.dart';
@@ -8,9 +6,9 @@ import 'package:vivarium_control_unit/Constants.dart';
 import 'package:vivarium_control_unit/models/device.dart';
 import 'package:vivarium_control_unit/models/feedTrigger.dart';
 import 'package:vivarium_control_unit/models/ledTrigger.dart';
-import 'package:vivarium_control_unit/ui/device/deviceOverviewSubpage.dart';
-import 'package:vivarium_control_unit/ui/device/deviceSettingsSubpage.dart';
-import 'package:vivarium_control_unit/ui/device/deviceViewSubpage.dart';
+import 'package:vivarium_control_unit/ui/device/overview/deviceOverviewSubpage.dart';
+import 'package:vivarium_control_unit/ui/device/settings/deviceSettingsSubpage.dart';
+import 'package:vivarium_control_unit/ui/device/camera/deviceViewSubpage.dart';
 import 'package:vivarium_control_unit/utils/auth.dart';
 import 'package:vivarium_control_unit/utils/bluetoothHandler.dart';
 import 'package:vivarium_control_unit/utils/hiveBoxes.dart';

@@ -2,7 +2,7 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:vivarium_control_unit/models/device.dart';
-import 'package:vivarium_control_unit/ui/device/fullScreen.dart';
+import 'package:vivarium_control_unit/ui/device/camera/fullScreen.dart';
 
 class DeviceViewSubpage extends StatefulWidget {
   final Device device;
@@ -64,7 +64,6 @@ class _DeviceViewSubpageState extends State<DeviceViewSubpage> {
 
   @override
   void didChangeDependencies() {
-    // TODO: implement didChangeDependencies
     super.didChangeDependencies();
     precacheImage(_image.image, context);
     if (_timer != null) {

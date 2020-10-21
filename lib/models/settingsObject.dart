@@ -2,8 +2,6 @@ import 'package:vivarium_control_unit/models/feedTrigger.dart';
 import 'package:vivarium_control_unit/models/ledTrigger.dart';
 import 'package:vivarium_control_unit/models/waterHeaterType.dart';
 
-//TODO use https://pub.dev/packages/flamingo
-
 enum SettingsObjectKey {
   ledOn,
   ledColor,
@@ -20,10 +18,7 @@ enum SettingsObjectKey {
   ledTriggers,
 }
 
-
-
-
-class SettingsObject  {
+class SettingsObject {
   ///water level
 
   int waterSensorHeight;
@@ -43,7 +38,7 @@ class SettingsObject  {
   ///Water temperature
 
   double waterOptimalTemperature;
-  int waterHeaterType;
+  HeaterType waterHeaterType;
 
   ///PH
   double waterMaxPh;
@@ -52,8 +47,6 @@ class SettingsObject  {
   ///Outlets
   bool powerOutletOneIsOn;
   bool powerOutletTwoIsOn;
-
-
 
   SettingsObject(
       {this.feedTriggers,
@@ -82,7 +75,7 @@ class SettingsObject  {
           minWaterHeight: data['minWaterHeight'] as int,
           waterSensorHeight: data['waterSensorHeight'] as int,
           //waterHeaterType: HeaterType.values.firstWhere((e) => e.toString() == data['waterHeaterType']),
-          waterHeaterType: data['waterHeaterType'] as int,
+          waterHeaterType: HeaterType.values[(data['waterHeaterType'] as int)],
           ledColor: data['ledColor'] as int,
           ledOn: data['ledOn'] as bool,
           waterOptimalTemperature: data['waterOptimalTemperature'] as double,
@@ -93,19 +86,19 @@ class SettingsObject  {
         );
 
   Map<String, dynamic> toJson() => {
-    'ledOn':ledOn,
-    'ledColor':ledColor,
-    'maxWaterHeight':maxWaterHeight,
-    'minWaterHeight':minWaterHeight,
-    'powerOutletOneIsOn':powerOutletOneIsOn,
-    'powerOutletTwoIsOn':powerOutletTwoIsOn,
-    'waterHeaterType':waterHeaterType,
-    'waterMinPh':waterMinPh,
-    'waterMaxPh':waterMaxPh,
-    'waterOptimalTemperature':waterOptimalTemperature,
-    'waterSensorHeight':waterSensorHeight,
-    'feedTriggers':feedTriggers.map((e) => e.toJson()),
-    'ledTriggers':ledTriggers.map((e) => e.toJson()),
+        'ledOn': ledOn,
+        'ledColor': ledColor,
+        'maxWaterHeight': maxWaterHeight,
+        'minWaterHeight': minWaterHeight,
+        'powerOutletOneIsOn': powerOutletOneIsOn,
+        'powerOutletTwoIsOn': powerOutletTwoIsOn,
+        'waterHeaterType': waterHeaterType,
+        'waterMinPh': waterMinPh,
+        'waterMaxPh': waterMaxPh,
+        'waterOptimalTemperature': waterOptimalTemperature,
+        'waterSensorHeight': waterSensorHeight,
+        'feedTriggers': feedTriggers.map((e) => e.toJson()),
+        'ledTriggers': ledTriggers.map((e) => e.toJson()),
       };
 
   SettingsObject.newEmpty()

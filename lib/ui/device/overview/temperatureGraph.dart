@@ -20,33 +20,13 @@ class _TemperatureGraphPage extends State<TemperatureGraph> {
   Map<String, num> _temps = <String, num>{};
 
   @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+  }
+
+  @override
   Widget build(BuildContext context) {
-    _onChangedListener(charts.SelectionModel model) {
-      print("change");
-      final selectedDatum = model.selectedDatum;
-      DateTime time;
-      final temps = <String, num>{};
-      if (selectedDatum.isNotEmpty) {
-        time = selectedDatum.first.datum.updateTime.toDate();
-
-        selectedDatum.forEach((charts.SeriesDatum datumPair) {
-          if (datumPair.datum.temp1 > widget.minTemperature) {
-            temps["temp1"] = datumPair.datum.temp1;
-          }
-          if (datumPair.datum.temp2 > widget.minTemperature) {
-            temps["temp2"] = datumPair.datum.temp2;
-          }
-        });
-      }
-
-      // Request a build.
-      setState(() {
-        _time = time;
-        _temps = temps;
-        _showLastMinutes = _showLastMinutes;
-      });
-    }
-
     return Scaffold(
       body: Column(
         children: <Widget>[
@@ -68,7 +48,7 @@ class _TemperatureGraphPage extends State<TemperatureGraph> {
                     return Center(child: CircularProgressIndicator());
                   }
                   List<SensorData> data = List();
-                  var history = snapshot.data['sensorValuesHistory'];
+                  var history = snapshot.data.data()['sensorValuesHistory'];
                   var it;
                   for (it in history) {
                     data.add(
@@ -165,5 +145,31 @@ class _TemperatureGraphPage extends State<TemperatureGraph> {
         data: filteredTemp2,
       )
     ];
+  }
+
+  _onChangedListener(charts.SelectionModel model) {
+    print("change");
+    final selectedDatum = model.selectedDatum;
+    DateTime time;
+    final temps = <String, num>{};
+    if (selectedDatum.isNotEmpty) {
+      time = selectedDatum.first.datum.updateTime.toDate();
+
+      selectedDatum.forEach((charts.SeriesDatum datumPair) {
+        if (datumPair.datum.temp1 > widget.minTemperature) {
+          temps["temp1"] = datumPair.datum.temp1;
+        }
+        if (datumPair.datum.temp2 > widget.minTemperature) {
+          temps["temp2"] = datumPair.datum.temp2;
+        }
+      });
+    }
+
+    // Request a build.
+    setState(() {
+      _time = time;
+      _temps = temps;
+      _showLastMinutes = _showLastMinutes;
+    });
   }
 }

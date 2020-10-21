@@ -1,13 +1,9 @@
-import 'dart:typed_data';
-
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/foundation.dart';
 import 'package:hive/hive.dart';
 
 part 'feedTrigger.g.dart';
 
 const FEED_TRIGGER_LIST_SIZE = 10;
-
 
 @HiveType(typeId: 1)
 enum FeedType {
@@ -17,19 +13,17 @@ enum FeedType {
   SCREW
 }
 
-extension FeedTypeExtension on FeedType{
+extension FeedTypeExtension on FeedType {
   String get text => describeEnum(this);
 }
 
 String getFeedTypeString(index) => FeedType.values[index].text;
-FeedType getFeedTypeFromString(name) =>FeedType.values.firstWhere((element) => element.text == name);
-int getIndexOfFeedType(name) =>FeedType.values.firstWhere((element) => element.text == name).index;
 
+FeedType getFeedTypeFromString(name) =>
+    FeedType.values.firstWhere((element) => element.text == name);
 
-
-
-
-
+int getIndexOfFeedType(name) =>
+    FeedType.values.firstWhere((element) => element.text == name).index;
 
 @HiveType(typeId: 2)
 class FeedTrigger extends HiveObject {
@@ -41,14 +35,10 @@ class FeedTrigger extends HiveObject {
 
   FeedTrigger({this.time, this.type});
 
+  factory FeedTrigger.fromJson(Map<String, dynamic> json) =>
+      FeedTrigger(time: json['time'] as int, type: json['type'] as int);
 
-
-  factory FeedTrigger.fromJson(Map<String, dynamic> json) => FeedTrigger(
-      time: json['time'] as int,
-      type: json['type'] as int);
-
-  Map<String, dynamic> toJson() =>
-      {"time": time, "type": type};
+  Map<String, dynamic> toJson() => {"time": time, "type": type};
 
   @override
   String toString() {

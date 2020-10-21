@@ -95,12 +95,12 @@ class _LoginPageState extends State<HomePage> {
         items: <BottomNavigationBarItem>[
           BottomNavigationBarItem(
             icon: Icon(Icons.location_on),
-            title: Text("Locations"),
+            label: "Locations",
             backgroundColor: Colors.blue,
           ),
           BottomNavigationBarItem(
               icon: Icon(Icons.settings),
-              title: Text("Settings"),
+              label: "Settings",
               backgroundColor: Colors.blue),
         ],
         onTap: _onTap,

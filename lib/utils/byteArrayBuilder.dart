@@ -5,66 +5,56 @@ import 'package:vivarium_control_unit/models/feedTrigger.dart';
 class ByteArrayBuilder {
   int size;
   int checksum;
-
   int listLength = 3;
-
   var rawDataList = <int>[];
-
   ByteArrayBuilder();
 
-  void setSizeOfObject(Map<String, dynamic> objectMap){
+  void setSizeOfObject(Map<String, dynamic> objectMap) {
     print("size of object");
 
     int size = 0;
-    for (dynamic value in objectMap.values){
+    for (dynamic value in objectMap.values) {
       print(value.runtimeType);
 
-      if (value is int){
-        size +=4;
+      if (value is int) {
+        size += 4;
       }
-      if (value is bool){
-        size +=1;
+      if (value is bool) {
+        size += 1;
       }
-      if (value is double){
-        size +=4;
+      if (value is double) {
+        size += 4;
       }
 
-      if (value is Iterable){
+      if (value is Iterable) {
         print("iterable");
-        size+= ((4+4)*listLength)~/(2/1); //Feed and led triggers
+        size += ((4 + 4) * listLength) ~/ (2 / 1); //Feed and led triggers
       }
-
     }
     print("Size: $size");
     this.size = size;
     checksum = this.size;
   }
 
-
-
   void addData(dynamic data) {
     if (data is bool) {
       addBool(data);
     }
-    if (data is int){
+    if (data is int) {
       addInt(data);
     }
 
-    if (data is double){
+    if (data is double) {
       addDouble(data);
     }
-    if (data is List<FeedTrigger>){
+    if (data is List<FeedTrigger>) {
       int size = data.length;
-      for (int i = 0;i<listLength;i++){
-        if (i<size){
-          //print("EPOCH =");
+      for (int i = 0; i < listLength; i++) {
+        if (i < size) {
           FeedTrigger t = data.elementAt(i);
           int epoch = t.time;
           final list = new Uint64List.fromList([epoch]);
           final bytes = new Uint8List.view(list.buffer);
-         // print(bytes);
-
-         // print("epoch = ${t.time}");
           addInt(t.time);
           addInt(t.type);
         } else {
@@ -88,7 +78,6 @@ class ByteArrayBuilder {
 //        }
 //      }
 //    }
-
   }
 
   ///0x06
@@ -109,8 +98,8 @@ class ByteArrayBuilder {
   void addInt(int data) {
     final list = new Uint64List.fromList([data]);
     final bytes = new Uint8List.view(list.buffer);
-    for (int i = 0; i<4;i++){
-      checksum^=bytes.elementAt(i);
+    for (int i = 0; i < 4; i++) {
+      checksum ^= bytes.elementAt(i);
       rawDataList.add(bytes.elementAt(i));
     }
   }
@@ -122,14 +111,12 @@ class ByteArrayBuilder {
   }
 
   void addDouble(double data) {
-    var valueFloat = new Float32List (1);
-    valueFloat [0] = data;
+    var valueFloat = new Float32List(1);
+    valueFloat[0] = data;
     var listOfBytes = valueFloat.buffer.asUint8List();
-    for (int i = 0; i<4; i++){
-      checksum^=listOfBytes.elementAt(i);
+    for (int i = 0; i < 4; i++) {
+      checksum ^= listOfBytes.elementAt(i);
       rawDataList.add(listOfBytes.elementAt(i));
     }
   }
-
-
 }
