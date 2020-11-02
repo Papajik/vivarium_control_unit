@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
 import 'package:vivarium_control_unit/models/device.dart';
 import 'package:vivarium_control_unit/ui/device/camera/fullScreen.dart';
 
@@ -21,6 +22,7 @@ class _DeviceViewSubpageState extends State<DeviceViewSubpage> {
   String _url;
   int _param = 0;
   Image _image;
+  bool _hasError;
 
   @override
   Widget build(BuildContext context) {
@@ -30,16 +32,9 @@ class _DeviceViewSubpageState extends State<DeviceViewSubpage> {
       child: GestureDetector(
         child: Hero(
           tag: "imageHero",
-          child: _image,
+          child: buildBody(),
         ),
-        onTap: (){
-          Navigator.push(context, MaterialPageRoute(builder: (_) {
-            return FullScreenView(
-              address: widget.device.camera.address,
-              param: _param,
-            );
-          }));
-        },
+        onTap: _onTap(),
       ),
       color: Colors.lightBlue.shade200,
     );
@@ -47,37 +42,78 @@ class _DeviceViewSubpageState extends State<DeviceViewSubpage> {
 
   @override
   void initState() {
-    _url = "${widget.device.camera.address}&param=$_param";
-    _image = Image(
-      image: NetworkImage(_url),
-      fit: BoxFit.contain,
-    );
-
+    createUrl();
+    http
+        .get(_url)
+        .then((value) => setState(() => _hasError = value.statusCode != 200));
+    loadImage();
     super.initState();
   }
 
   @override
   void dispose() {
-    _timer.cancel();
+    _timer?.cancel();
     super.dispose();
   }
 
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    precacheImage(_image.image, context);
-    if (_timer != null) {
-      _timer.cancel();
-    }
+    print("didChangeDependencies");
+    _timer?.cancel();
+    tryToPreCache();
 
     _timer = new Timer.periodic(
         Duration(seconds: 5),
         (Timer t) => {
               _param++,
-              _url = "${widget.device.camera.address}&param=$_param",
-              _image = Image(image: NetworkImage(_url), fit: BoxFit.contain),
-              precacheImage(_image.image, context)
-                  .then((value) => setState(() {}))
+             createUrl(),
+              tryToPreCache()
             });
+  }
+
+  tryToPreCache() {
+    if (_hasError != null && _hasError) return;
+    print("precache");
+    print(_image);
+    precacheImage(_image.image, context)
+        .then((value) => mounted ? setState(() {}) : {});
+  }
+
+  loadImage() {
+    _image = Image(
+      image: NetworkImage(_url),
+      fit: BoxFit.contain,
+    );
+  }
+
+  buildBody() {
+    if (_hasError == null) {
+      return Center(
+        child: CircularProgressIndicator(),
+      );
+    }
+    if (_hasError) {
+      return Text("Couldn't load image");
+    } else {
+      return _image;
+    }
+  }
+
+  _onTap() {
+    if (_hasError == null) return null;
+    if (_hasError) return null;
+    return () {
+      Navigator.push(context, MaterialPageRoute(builder: (_) {
+        return FullScreenView(
+          address: widget.device.camera.address,
+          param: _param,
+        );
+      }));
+    };
+  }
+
+  void createUrl() {
+    _url = "${widget.device.camera.address}?param=$_param&alt=media";
   }
 }

@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
 class FullScreenView extends StatefulWidget {
@@ -39,7 +40,7 @@ class _FullScreenViewState extends State<FullScreenView> {
   @override
   void initState() {
     _param = widget.param;
-    _url = "${widget.address}&param=$_param";
+    createUrl();
     _image = Image(
       image: NetworkImage(_url),
       fit: BoxFit.contain,
@@ -67,10 +68,14 @@ class _FullScreenViewState extends State<FullScreenView> {
         Duration(seconds: 5),
         (Timer t) => {
               _param++,
-              _url = "${widget.address}&param=$_param",
+              createUrl(),
               _image = Image(image: NetworkImage(_url), fit: BoxFit.contain),
               precacheImage(_image.image, context)
                   .then((value) => setState(() {}))
             });
+  }
+
+  void createUrl() {
+    _url = "${widget.address}?param=$_param&alt=media";
   }
 }
