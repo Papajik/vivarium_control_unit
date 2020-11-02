@@ -41,7 +41,7 @@ class _LedTriggerTileState extends State<LedTriggerTile> {
               width: 120,
               child: DateTimePicker(
                   type: DateTimePickerType.time,
-                  initialValue: getWidgetTime(),
+                  initialValue: getTimeStringFromTime(widget.trigger.time),
                   timeLabelText: "Time",
                   onChanged: (val) => {
                         widget.trigger.time = getTimeFromString(val),
@@ -115,15 +115,6 @@ class _LedTriggerTileState extends State<LedTriggerTile> {
         widget.onChanged(null);
         break;
     }
-  }
-
-  String getWidgetTime() {
-    String lsHour =
-        getHourFromTime(widget.trigger.time).toString().padLeft(2, '0');
-    String lsMinute =
-        getMinuteFromTime(widget.trigger.time).toString().padLeft(2, '0');
-    print("widget time = ${lsHour + ":" + lsMinute}");
-    return lsHour + ":" + lsMinute;
   }
 
   bool ledOn() {
