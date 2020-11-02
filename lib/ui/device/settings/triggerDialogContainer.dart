@@ -11,15 +11,16 @@ class TriggerDialogContainer extends StatelessWidget {
 
   const TriggerDialogContainer(
       {Key key,
-      this.child,
-      this.onTimeChanged,
-      this.selectedTime,
-      this.title,
-      this.onSaved})
+      @required this.child,
+      @required this.onTimeChanged,
+      @required this.selectedTime,
+      @required this.title,
+      @required this.onSaved})
       : super(key: key);
 
   @override
   Widget build(BuildContext context) {
+    print("triggerDialogContainer");
     return AlertDialog(
       title: Text("New timer"),
       content: Row(

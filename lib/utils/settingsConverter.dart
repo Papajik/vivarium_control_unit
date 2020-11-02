@@ -5,6 +5,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:hive/hive.dart';
 import 'package:vivarium_control_unit/models/feedTrigger.dart';
 import 'package:vivarium_control_unit/models/ledTrigger.dart';
+import 'package:vivarium_control_unit/models/outletTrigger.dart';
 import 'package:vivarium_control_unit/models/settingsObject.dart';
 import 'package:vivarium_control_unit/models/waterHeaterType.dart';
 import 'package:vivarium_control_unit/utils/byteArrayBuilder.dart';
@@ -22,6 +23,8 @@ const String WATER_HEATER_TYPE = "settings.waterHeaterType";
 const String WATER_MAX_PH = "settings.waterMaxPh";
 const String WATER_MIN_PH = "settings.waterMinPh";
 const String POWER_OUTLET_ONE_ON = "settings.powerOutletOneIsOn";
+const String POWER_OUTLET_ONE_TRIGGERS = "settings.powerOutletOneTriggers";
+const String POWER_OUTLET_TWO_TRIGGERS = "settings.powerOutletTwoTriggers";
 const String POWER_OUTLET_TWO_ON = "settings.powerOutletTwoIsOn";
 
 class SettingsConverter {
@@ -31,15 +34,22 @@ class SettingsConverter {
   Box mainBox = Hive.box(HiveBoxes.mainBox);
   Box<FeedTrigger> feedTriggersBox;
   Box<LedTrigger> ledTriggersBox;
+  Box<OutletTrigger> outletOneTriggersBox;
+  Box<OutletTrigger> outletTwoTriggersBox;
 
   SettingsConverter({this.deviceId, this.userId}) {
+    print("SettingsConverter - constructor");
     feedTriggersBox =
         Hive.box<FeedTrigger>(HiveBoxes.feedTriggerList + deviceId);
     ledTriggersBox = Hive.box<LedTrigger>(HiveBoxes.ledTriggerList + deviceId);
+    outletOneTriggersBox =
+        Hive.box<OutletTrigger>(HiveBoxes.outletOneTriggerList + deviceId);
+    outletTwoTriggersBox =
+        Hive.box<OutletTrigger>(HiveBoxes.outletTwoTriggerList + deviceId);
   }
 
   Future<bool> loadSettingsFromCloud() async {
-    //  print("Loading from cloud");
+    print("Loading from cloud");
     var docRef = FirebaseFirestore.instance
         .collection("users")
         .doc(userId)
@@ -47,13 +57,13 @@ class SettingsConverter {
         .doc(deviceId);
     var data = await docRef.get();
     var settings = data.data()["settings"];
-    //  print(settings);
+//      print(settings);
     settingsObject =
         SettingsObject.fromJson(Map<String, dynamic>.from(settings));
-    //  print("object created");
-    // print(settingsObject.ledTriggers);
+     print("object created");
+//     print(settingsObject.ledTriggers);
     await updateCache();
-    // print("cache updated");
+     print("cache updated");
     return true;
   }
 
@@ -84,6 +94,8 @@ class SettingsConverter {
 //    print("updateFeedTriggers updated");
     await updateLedTriggers();
 //    print("updateLedTriggers updated");
+    await updateOutletOneTriggers();
+    await updateOutletTwoTriggers();
     await updateMainBox();
 //    print("updateMainBox updated");
     return;
@@ -92,6 +104,17 @@ class SettingsConverter {
   updateLedTriggers() async {
     await ledTriggersBox.clear();
     await ledTriggersBox.addAll(settingsObject.ledTriggers);
+    return true;
+  }
+  updateOutletOneTriggers() async {
+    print("updateOutletOneTriggers");
+    await outletOneTriggersBox.clear();
+    await outletOneTriggersBox.addAll(settingsObject.powerOutletOneTriggers);
+    return true;
+  }
+  updateOutletTwoTriggers() async {
+    await outletTwoTriggersBox.clear();
+    await outletTwoTriggersBox.addAll(settingsObject.powerOutletTwoTriggers);
     return true;
   }
 
@@ -133,12 +156,19 @@ class SettingsConverter {
   }
 
   List<FeedTrigger> getFeedTriggers() {
-    //Box<FeedTrigger> feedTriggers =        Hive.box(HiveBoxes.feedTriggerList + deviceId);
     return feedTriggersBox.values.toList();
   }
 
   List<LedTrigger> getLedTriggers() {
     return ledTriggersBox.values.toList();
+  }
+
+  List<OutletTrigger> getOutletOneTrigger() {
+    return outletOneTriggersBox.values.toList();
+  }
+
+  List<OutletTrigger> getOutletTwoTrigger() {
+    return outletTwoTriggersBox.values.toList();
   }
 
   saveItem(String key, dynamic value) async {

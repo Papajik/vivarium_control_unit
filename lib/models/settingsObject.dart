@@ -1,5 +1,6 @@
 import 'package:vivarium_control_unit/models/feedTrigger.dart';
 import 'package:vivarium_control_unit/models/ledTrigger.dart';
+import 'package:vivarium_control_unit/models/outletTrigger.dart';
 import 'package:vivarium_control_unit/models/waterHeaterType.dart';
 
 enum SettingsObjectKey {
@@ -29,6 +30,8 @@ class SettingsObject {
 
   List<LedTrigger> ledTriggers;
   List<FeedTrigger> feedTriggers;
+  List<OutletTrigger> powerOutletOneTriggers;
+  List<OutletTrigger> powerOutletTwoTriggers;
 
   /// LED COLOR
 
@@ -51,6 +54,8 @@ class SettingsObject {
   SettingsObject(
       {this.feedTriggers,
       this.ledTriggers,
+      this.powerOutletOneTriggers,
+      this.powerOutletTwoTriggers,
       this.waterHeaterType,
       this.ledColor,
       this.ledOn,
@@ -71,10 +76,15 @@ class SettingsObject {
           feedTriggers: (data['feedTriggers'] as List)
               .map((e) => FeedTrigger.fromJson(e))
               .toList(),
+          powerOutletOneTriggers: (data['powerOutletOneTriggers'] as List)
+              .map((e) => OutletTrigger.fromJson(e))
+              .toList(),
+          powerOutletTwoTriggers: (data['powerOutletTwoTriggers'] as List)
+              .map((e) => OutletTrigger.fromJson(e))
+              .toList(),
           maxWaterHeight: data['maxWaterHeight'] as int,
           minWaterHeight: data['minWaterHeight'] as int,
           waterSensorHeight: data['waterSensorHeight'] as int,
-          //waterHeaterType: HeaterType.values.firstWhere((e) => e.toString() == data['waterHeaterType']),
           waterHeaterType: HeaterType.values[(data['waterHeaterType'] as int)],
           ledColor: data['ledColor'] as int,
           ledOn: data['ledOn'] as bool,
@@ -99,8 +109,14 @@ class SettingsObject {
         'waterSensorHeight': waterSensorHeight,
         'feedTriggers': feedTriggers.map((e) => e.toJson()),
         'ledTriggers': ledTriggers.map((e) => e.toJson()),
+        'powerOutletTwoTriggers': powerOutletTwoTriggers.map((e) => e.toJson()),
+        'powerOutletOneTriggers': powerOutletOneTriggers.map((e) => e.toJson()),
       };
 
   SettingsObject.newEmpty()
-      : this(feedTriggers: new List(), ledTriggers: new List());
+      : this(
+            feedTriggers: new List(),
+            ledTriggers: new List(),
+            powerOutletOneTriggers: new List(),
+            powerOutletTwoTriggers: new List());
 }

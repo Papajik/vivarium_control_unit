@@ -5,6 +5,7 @@ import 'package:hive/hive.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:vivarium_control_unit/models/feedTrigger.dart';
 import 'package:vivarium_control_unit/models/ledTrigger.dart';
+import 'package:vivarium_control_unit/models/outletTrigger.dart';
 import 'package:vivarium_control_unit/models/waterHeaterType.dart';
 import 'package:vivarium_control_unit/utils/hiveBoxes.dart';
 
@@ -20,11 +21,10 @@ class HiveCache extends CacheProvider {
       ..registerAdapter(FeedTypeAdapter())
       ..registerAdapter(LedTriggerAdapter())
       ..registerAdapter(FeedTriggerAdapter())
-      ..registerAdapter(HeaterTypeAdapter());
-
+      ..registerAdapter(HeaterTypeAdapter())
+      ..registerAdapter(OutletTriggerAdapter());
 
     _preferences = await Hive.openBox(HiveBoxes.mainBox);
-   // _preferences.clear();
   }
 
   @override

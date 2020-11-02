@@ -7,7 +7,9 @@ import 'package:vivarium_control_unit/Constants.dart';
 import 'package:vivarium_control_unit/models/waterHeaterType.dart';
 import 'package:vivarium_control_unit/ui/device/settings/feedTriggerList.dart';
 import 'package:vivarium_control_unit/ui/device/settings/ledTriggerList.dart';
+import 'package:vivarium_control_unit/ui/device/settings/outletTriggerList.dart';
 import 'package:vivarium_control_unit/utils/bluetoothHandler.dart';
+import 'package:vivarium_control_unit/utils/hiveBoxes.dart';
 import 'package:vivarium_control_unit/utils/settingsConverter.dart';
 
 class DeviceSettingsSubpage extends StatefulWidget {
@@ -51,7 +53,8 @@ class _DeviceSettingsSubpageState extends State<DeviceSettingsSubpage> {
 
       ///TODO load settings for whole device page, not only settings
       builder: (context, snapshot) {
-        print("Has data = " + snapshot.hasData.toString());
+        print("Settings Subpage - builder = Has data = " +
+            snapshot.hasData.toString());
         if (!snapshot.hasData)
           return Center(
             child: CircularProgressIndicator(),
@@ -163,13 +166,13 @@ class _DeviceSettingsSubpageState extends State<DeviceSettingsSubpage> {
                   print(
                       "deviceSettingsSubpage - ledTriggerList, saving trigger = $trigger");
                   await trigger.save();
-                  await _settingsConverter.saveItemToCloud(
-                      LED_TRIGGERS,
-                      _settingsConverter
-                          .getLedTriggers()
-                          .map((e) => e.toJson())
-                          .toList());
                 }
+                await _settingsConverter.saveItemToCloud(
+                    LED_TRIGGERS,
+                    _settingsConverter
+                        .getLedTriggers()
+                        .map((e) => e.toJson())
+                        .toList());
               },
             )
           ], //TODO add led triggers list with custom tiles
@@ -295,6 +298,7 @@ class _DeviceSettingsSubpageState extends State<DeviceSettingsSubpage> {
   }
 
   _createOutletsGroup() {
+    // print("_createOutletsGroup");
     return SettingsScreen.SettingsGroup(
       title: 'Power outlets',
       children: [
@@ -305,6 +309,26 @@ class _DeviceSettingsSubpageState extends State<DeviceSettingsSubpage> {
             await _settingsConverter.saveItem(POWER_OUTLET_ONE_ON, value);
           },
         ),
+        SettingsScreen.ExpandableSettingsTile(
+          title: "Power outlet 1 triggers",
+          children: [
+            OutletTriggerList(
+              deviceId: widget.deviceId,
+              boxName: HiveBoxes.outletOneTriggerList,
+              onChanged: (trigger) async {
+                if (trigger != null) {
+                  await trigger.save();
+                }
+                await _settingsConverter.saveItemToCloud(
+                    POWER_OUTLET_ONE_TRIGGERS,
+                    _settingsConverter
+                        .getOutletOneTrigger()
+                        .map((e) => e.toJson())
+                        .toList());
+              },
+            )
+          ],
+        ),
         SettingsScreen.SwitchSettingsTile(
           settingKey: widget.deviceId + POWER_OUTLET_TWO_ON,
           title: 'Outlet two',
@@ -312,7 +336,26 @@ class _DeviceSettingsSubpageState extends State<DeviceSettingsSubpage> {
             await _settingsConverter.saveItem(POWER_OUTLET_TWO_ON, value);
           },
         ),
-        //TODO add outlets triggers
+        SettingsScreen.ExpandableSettingsTile(
+          title: "Power outlet 2 triggers",
+          children: [
+            OutletTriggerList(
+              deviceId: widget.deviceId,
+              boxName: HiveBoxes.outletTwoTriggerList,
+              onChanged: (trigger) async {
+                if (trigger != null) {
+                  await trigger.save();
+                }
+                await _settingsConverter.saveItemToCloud(
+                    POWER_OUTLET_TWO_TRIGGERS,
+                    _settingsConverter
+                        .getOutletTwoTrigger()
+                        .map((e) => e.toJson())
+                        .toList());
+              },
+            )
+          ],
+        ),
       ],
     );
   }
