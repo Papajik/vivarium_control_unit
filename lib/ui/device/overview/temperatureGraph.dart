@@ -2,13 +2,13 @@ import 'package:charts_flutter/flutter.dart' as charts;
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:vivarium_control_unit/models/sensorData.dart';
+import 'package:vivarium_control_unit/utils/auth.dart';
 
 class TemperatureGraph extends StatefulWidget {
   final String deviceId;
-  final String userId;
   final double minTemperature = 5;
 
-  TemperatureGraph({Key key, this.deviceId, this.userId}) : super(key: key);
+  TemperatureGraph({Key key,@required this.deviceId,}) : super(key: key);
 
   @override
   _TemperatureGraphPage createState() => _TemperatureGraphPage();
@@ -36,7 +36,7 @@ class _TemperatureGraphPage extends State<TemperatureGraph> {
             child: StreamBuilder(
                 stream: FirebaseFirestore.instance
                     .collection("users")
-                    .doc(widget.userId)
+                    .doc(userId)
                     .collection("deviceHistories")
                     .doc(widget.deviceId)
                     .snapshots(),
