@@ -38,10 +38,10 @@ class FeedTrigger extends HiveObject {
   factory FeedTrigger.fromJson(Map<String, dynamic> json) =>
       FeedTrigger(time: json['time'] as int, type: json['type'] as int);
 
-  Map<String, dynamic> toJson() => {"time": time, "type": type};
+  Map<String, dynamic> toJson() => {'time': time, 'type': type};
 
   @override
   String toString() {
-    return '{"type" : ${this.type},"time" : ${this.time} }';
+    return '{"type" : ${type},"time" : ${time} }';
   }
 }

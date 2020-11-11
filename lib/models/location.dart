@@ -16,10 +16,10 @@ class Location {
   Location.fromJson(Map<String, dynamic> data, String id)
       : this(
             id: id,
-            name: data["name"],
-            condition: Condition.values[data["condition"]],
-            lastUpdate: data["lastUpdate"],
-            deviceCount: data["deviceCount"]);
+            name: data['name'],
+            condition: Condition.values[data['condition']],
+            lastUpdate: data['lastUpdate'],
+            deviceCount: data['deviceCount']);
 
 
 }

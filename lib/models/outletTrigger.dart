@@ -14,11 +14,12 @@ class OutletTrigger extends HiveObject {
     this.outletOn = false
   });
 
-  factory OutletTrigger.fromJson(Map<String, dynamic> json) => new OutletTrigger(time: json['time'], outletOn: json['outletOn']);
+  factory OutletTrigger.fromJson(Map<String, dynamic> json) => OutletTrigger(time: json['time'], outletOn: json['outletOn']);
 
 
-  Map<String, dynamic> toJson() => {"time": time, 'outletOn': outletOn};
+  Map<String, dynamic> toJson() => {'time': time, 'outletOn': outletOn};
 
+  @override
   String toString() {
     return '{"time": $time,"isOn": $outletOn }';
   }

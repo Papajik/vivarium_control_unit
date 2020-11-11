@@ -1,6 +1,7 @@
 import 'dart:ui';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_blue/flutter_blue.dart';
 import 'package:flutter_settings_screens/flutter_settings_screens.dart'
     as SettingsScreen;
 import 'package:vivarium_control_unit/Constants.dart';
@@ -8,7 +9,7 @@ import 'package:vivarium_control_unit/models/waterHeaterType.dart';
 import 'package:vivarium_control_unit/ui/device/settings/feedTriggerList.dart';
 import 'package:vivarium_control_unit/ui/device/settings/ledTriggerList.dart';
 import 'package:vivarium_control_unit/ui/device/settings/outletTriggerList.dart';
-import 'package:vivarium_control_unit/utils/bluetoothHandler.dart';
+import 'package:vivarium_control_unit/utils/bluetoothProvider.dart';
 import 'package:vivarium_control_unit/utils/hiveBoxes.dart';
 import 'package:vivarium_control_unit/utils/settingsConverter.dart';
 
@@ -310,7 +311,7 @@ class _DeviceSettingsSubpageState extends State<DeviceSettingsSubpage> {
           },
         ),
         SettingsScreen.ExpandableSettingsTile(
-          title: "Power outlet 1 triggers",
+          title: 'Power outlet 1 triggers',
           children: [
             OutletTriggerList(
               deviceId: widget.deviceId,
@@ -337,7 +338,7 @@ class _DeviceSettingsSubpageState extends State<DeviceSettingsSubpage> {
           },
         ),
         SettingsScreen.ExpandableSettingsTile(
-          title: "Power outlet 2 triggers",
+          title: 'Power outlet 2 triggers',
           children: [
             OutletTriggerList(
               deviceId: widget.deviceId,
@@ -360,7 +361,7 @@ class _DeviceSettingsSubpageState extends State<DeviceSettingsSubpage> {
     );
   }
 
-  _createDirectSaveButton() {
+  StreamBuilder<BluetoothDevice> _createDirectSaveButton() {
     return StreamBuilder(
       stream: widget.bluetoothHandler.device(),
       builder: (context, snapshot) {

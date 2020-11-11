@@ -10,22 +10,22 @@ class DeviceTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ListTile(
-        title: Text(device.name) ?? Text("Unknown device"),
+        title: Text(device.name) ?? Text('Unknown device'),
         subtitle: Builder (
           builder: (context){
             switch (getTypeFromIndex(device.type)){
               case Type.AQUARIUM:
-                return Text("Akvarium");
+                return Text('Aquarium');
               case Type.TERRARIUM:
-                return Text("Terrarium");
+                return Text('Terrarium');
               default:
-                return Text("");
+                return Text('');
             }
           },
         ),
         trailing: Column(
           children: <Widget>[
-            Text("Last update"),
+            Text('Last update'),
             Text(device.sensorValues.updateTime.toDate().toIso8601String())
           ],
         ),
@@ -49,8 +49,8 @@ class DeviceTile extends StatelessWidget {
         ),
         onTap: () {
           Navigator.of(context)
-              .push(MaterialPageRoute<Null>(builder: (BuildContext context) {
-            return new DevicePage(device: device);
+              .push(MaterialPageRoute<void>(builder: (BuildContext context) {
+            return DevicePage(device: device);
           }));
         });
   }

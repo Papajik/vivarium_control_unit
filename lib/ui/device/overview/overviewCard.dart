@@ -52,12 +52,12 @@ class TriggerCardBody extends StatelessWidget {
     return CardBody(
       icon: icon,
       children: [
-        Text("Next trigger: $nextTriggerTime"),
+        Text('Next trigger: $nextTriggerTime'),
         SizedBox(
           height: 10,
         ),
         Row(
-          children: [Text("Next change:"), nextChange],
+          children: [Text('Next change:'), nextChange],
         )
       ],
     );

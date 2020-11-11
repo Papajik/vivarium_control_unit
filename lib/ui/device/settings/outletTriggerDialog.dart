@@ -50,7 +50,7 @@ class _OutletTriggerDialogState extends State<OutletTriggerDialog> {
       },
       onSaved: () async {
         if (widget.trigger == null) {
-          OutletTrigger t = OutletTrigger(time: _selectedTime, outletOn: _isOn);
+          var t = OutletTrigger(time: _selectedTime, outletOn: _isOn);
           await Hive.box<OutletTrigger>(widget.boxId).add(t);
           widget.onChanged(t);
         } else {
@@ -62,7 +62,7 @@ class _OutletTriggerDialogState extends State<OutletTriggerDialog> {
       },
       child: Row(
         children: [
-          Text(_isOn ? "Turn on" : "Turn off"),
+          Text(_isOn ? 'Turn on' : 'Turn off'),
           Switch(
             onChanged: (val) => setState(() => {_isOn = val}),
             value: _isOn,

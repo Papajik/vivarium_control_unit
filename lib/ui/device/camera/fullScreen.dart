@@ -64,7 +64,7 @@ class _FullScreenViewState extends State<FullScreenView> {
       _timer.cancel();
     }
 
-    _timer = new Timer.periodic(
+    _timer = Timer.periodic(
         Duration(seconds: 5),
         (Timer t) => {
               _param++,
@@ -76,6 +76,6 @@ class _FullScreenViewState extends State<FullScreenView> {
   }
 
   void createUrl() {
-    _url = "${widget.address}?param=$_param&alt=media";
+    _url = '${widget.address}?param=$_param&alt=media';
   }
 }

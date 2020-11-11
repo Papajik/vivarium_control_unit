@@ -17,14 +17,15 @@ class LedTrigger extends HiveObject {
   });
 
   factory LedTrigger.fromJson(Map<String, dynamic> json) =>
-      LedTrigger(time: json["time"], color: json["color"]);
+      LedTrigger(time: json['time'], color: json['color']);
 
-  Map<String, dynamic> toJson() => {"time": time, "color": color};
+  Map<String, dynamic> toJson() => {'time': time, 'color': color};
 
   Map<String, dynamic> toMap() {
     return toJson();
   }
 
+  @override
   String toString() {
     return '{"time": $time,"color": $color }';
   }

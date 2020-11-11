@@ -4,16 +4,16 @@ class Peripheral{
   bool hasAdditionalInfo;
 
   static Map<String, String> nameValues = {
-    "fan":"Fan",
-    "feeder":"Feeder",
-    "filter":"Filter",
-    "heater":"Heater",
-    "led": "Light",
-    "ph": "PH",
-    "pump": "Water pump",
-    "water": "Water level sensor",
-    "temp1": "Temperature 1",
-    "temp2": "Temperature 2"
+    'fan':'Fan',
+    'feeder':'Feeder',
+    'filter':'Filter',
+    'heater':'Heater',
+    'led': 'Light',
+    'ph': 'PH',
+    'pump': 'Water pump',
+    'water': 'Water level sensor',
+    'temp1': 'Temperature 1',
+    'temp2': 'Temperature 2'
   };
 
   Peripheral({this.enabled, this.hasAdditionalInfo, this.nameKey});
@@ -29,7 +29,7 @@ class Peripheral{
 
   Map<String, dynamic> toJson() => {
     nameValues[nameKey]: enabled,
-    "additionalInfo": hasAdditionalInfo
+    'additionalInfo': hasAdditionalInfo
   };
 }
 

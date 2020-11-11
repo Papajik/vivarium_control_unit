@@ -1,0 +1,6 @@
+include: package:pedantic/analysis_options.yaml
+linter:
+  rules:
+    - prefer_void_to_null
+    - void_checks
+    - await_only_futures

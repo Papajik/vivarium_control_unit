@@ -1,7 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
-import 'package:flutter_bluetooth_serial/flutter_bluetooth_serial.dart';
+import 'package:flutter_bluetooth_serial/flutter_bluetooth_serial.dart' as bs;
 import 'package:hive/hive.dart';
 import 'package:vivarium_control_unit/Constants.dart';
 import 'package:vivarium_control_unit/models/device.dart';
@@ -12,7 +12,7 @@ import 'package:vivarium_control_unit/ui/device/camera/deviceViewSubpage.dart';
 import 'package:vivarium_control_unit/ui/device/overview/deviceOverviewSubpage.dart';
 import 'package:vivarium_control_unit/ui/device/settings/deviceSettingsSubpage.dart';
 import 'package:vivarium_control_unit/utils/auth.dart';
-import 'package:vivarium_control_unit/utils/bluetoothHandler.dart';
+import 'package:vivarium_control_unit/utils/bluetoothProvider.dart';
 import 'package:vivarium_control_unit/utils/hiveBoxes.dart';
 
 class DevicePage extends StatefulWidget {
@@ -26,7 +26,7 @@ class DevicePage extends StatefulWidget {
 
 class _DevicePage extends State<DevicePage> {
   BluetoothHandler _bluetoothHandler;
-  StreamSubscription<BluetoothState> subscription;
+  StreamSubscription<bs.BluetoothState> subscription;
 
   @override
   void initState() {
@@ -35,9 +35,9 @@ class _DevicePage extends State<DevicePage> {
         BluetoothHandler(widget.device.macAddress, widget.device.name);
 
     ///Whenever is bluetooth state changed, rebuild widget
-    subscription = FlutterBluetoothSerial.instance
+    subscription = bs.FlutterBluetoothSerial.instance
         .onStateChanged()
-        .listen((BluetoothState state) {
+        .listen((bs.BluetoothState state) {
       setState(() {});
     });
   }
@@ -53,7 +53,7 @@ class _DevicePage extends State<DevicePage> {
   Widget build(BuildContext context) {
     return DefaultTabController(
         length: 3,
-        child: new Scaffold(
+        child: Scaffold(
           appBar: AppBar(
             title: Text(widget.device.name),
             centerTitle: true,
@@ -78,10 +78,11 @@ class _DevicePage extends State<DevicePage> {
               FutureBuilder(
                 future: _initializeHive(),
                 builder: (context, snapshot) {
-                  if (!snapshot.hasData)
+                  if (!snapshot.hasData) {
                     return Container(
-                      child: Text(""),
+                      child: Text(''),
                     );
+                  }
                   return DeviceSettingsSubpage(
                       useCloud: true,
                       userId: userId,
@@ -95,15 +96,15 @@ class _DevicePage extends State<DevicePage> {
         ));
   }
 
-  FutureBuilder<BluetoothState> _createConnectButtonFuture() {
-    return FutureBuilder<BluetoothState>(
-        future: FlutterBluetoothSerial.instance.state,
+  FutureBuilder<bs.BluetoothState> _createConnectButtonFuture() {
+    return FutureBuilder<bs.BluetoothState>(
+        future: bs.FlutterBluetoothSerial.instance.state,
         builder: (context, snapshot) {
-          if (!(snapshot.data == BluetoothState.STATE_ON ||
-              snapshot.data == BluetoothState.STATE_BLE_ON)) {
+          if (!(snapshot.data == bs.BluetoothState.STATE_ON ||
+              snapshot.data == bs.BluetoothState.STATE_BLE_ON)) {
             return IconButton(
               icon: Icon(Icons.bluetooth),
-              onPressed: () => FlutterBluetoothSerial.instance.requestEnable(),
+              onPressed: () => bs.FlutterBluetoothSerial.instance.requestEnable(),
             );
           }
           return buildConnectButton(context);
@@ -120,7 +121,7 @@ class _DevicePage extends State<DevicePage> {
             onPressed: _bluetoothHandler.isConnecting()
                 ? null
                 : () async {
-                    _bluetoothHandler.connectDevice();
+                    await _bluetoothHandler.connectDevice();
                   },
           );
         }
@@ -135,9 +136,7 @@ class _DevicePage extends State<DevicePage> {
     );
   }
 
-  _initializeHive() async {
-    //  await Hive.deleteBoxFromDisk(HiveBoxes.ledTriggerList + widget.device.id);
-    //  await Hive.deleteBoxFromDisk(HiveBoxes.feedTriggerList + widget.device.id);
+  Future<bool> _initializeHive() async {
     await Hive.openBox<FeedTrigger>(
         HiveBoxes.feedTriggerList + widget.device.id);
     await Hive.openBox<LedTrigger>(HiveBoxes.ledTriggerList + widget.device.id);

@@ -31,7 +31,7 @@ class _DeviceViewSubpageState extends State<DeviceViewSubpage> {
       height: double.infinity,
       child: GestureDetector(
         child: Hero(
-          tag: "imageHero",
+          tag: 'imageHero',
           child: buildBody(),
         ),
         onTap: _onTap(),
@@ -59,11 +59,11 @@ class _DeviceViewSubpageState extends State<DeviceViewSubpage> {
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    print("didChangeDependencies");
+    print('didChangeDependencies');
     _timer?.cancel();
     tryToPreCache();
 
-    _timer = new Timer.periodic(
+    _timer = Timer.periodic(
         Duration(seconds: 5),
         (Timer t) => {
               _param++,
@@ -72,22 +72,22 @@ class _DeviceViewSubpageState extends State<DeviceViewSubpage> {
             });
   }
 
-  tryToPreCache() {
+  void tryToPreCache() {
     if (_hasError != null && _hasError) return;
-    print("precache");
+    print('precache');
     print(_image);
     precacheImage(_image.image, context)
         .then((value) => mounted ? setState(() {}) : {});
   }
 
-  loadImage() {
+  void loadImage() {
     _image = Image(
       image: NetworkImage(_url),
       fit: BoxFit.contain,
     );
   }
 
-  buildBody() {
+  Widget buildBody() {
     if (_hasError == null) {
       return Center(
         child: CircularProgressIndicator(),
@@ -100,7 +100,8 @@ class _DeviceViewSubpageState extends State<DeviceViewSubpage> {
     }
   }
 
-  _onTap() {
+  //TODO check if woks
+  void Function() _onTap() {
     if (_hasError == null) return null;
     if (_hasError) return null;
     return () {
@@ -114,6 +115,6 @@ class _DeviceViewSubpageState extends State<DeviceViewSubpage> {
   }
 
   void createUrl() {
-    _url = "${widget.device.camera.address}?param=$_param&alt=media";
+    _url = '${widget.device.camera.address}?param=$_param&alt=media';
   }
 }

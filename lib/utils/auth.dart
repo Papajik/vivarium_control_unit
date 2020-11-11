@@ -24,10 +24,10 @@ Future<String> signInWithGoogle() async {
     idToken: googleSignInAuthentication.idToken,
   );
 
-  final UserCredential authResult = await _auth.signInWithCredential(credential);
+  final UserCredential authResult =
+      await _auth.signInWithCredential(credential);
 
   final User user = authResult.user;
-
 
   assert(user.email != null);
   assert(user.displayName != null);
@@ -40,9 +40,8 @@ Future<String> signInWithGoogle() async {
   imageUrl = user.photoURL;
   IdTokenResult idToken = await user.getIdTokenResult();
 
-  print("UserID = "+userId);
-  print("idToken = "+idToken.toString());
-
+  print("UserID = " + userId);
+  print("idToken = " + idToken.toString());
 
   if (name.contains(" ")) {
     name = name.substring(0, name.indexOf(" "));
@@ -62,19 +61,17 @@ Future<String> signInWithGoogle() async {
 }
 
 Future<String> createOrGetPhotonSecret(String uid) async {
-  final ref = FirebaseFirestore.instance.collection("users").doc(uid);
-  String s = await ref.get().then((document) {
-    if (!document.data().containsKey("particleSecret")) {
-      String secret = randomAlpha(25);
-      ref.set({
-        "particleSecret": secret
-      });
+  final ref = FirebaseFirestore.instance.collection('users').doc(uid);
+  var secret = await ref.get().then((document) {
+    if (!document.data().containsKey('particleSecret')) {
+      var secret = randomAlpha(25);
+      ref.set({'particleSecret': secret});
       return secret;
     } else {
-      return document.data()["particleSecret"];
+      return document.data()['particleSecret'];
     }
   });
-  return s;
+  return secret;
 }
 
 Future<String> getPhotonAccessToken(String uid) async {

@@ -182,13 +182,13 @@ class SettingsConverter {
     print(mainBox.toMap());
   }
 
-  saveItemToCloud(String key, dynamic value) async {
+  Future<void> saveItemToCloud(String key, dynamic value) async {
     //TODO add logic on failed update
-    print("save to cloud key = $key, value = $value");
+    print('save to cloud key = $key, value = $value');
     var docRef = FirebaseFirestore.instance
-        .collection("users")
+        .collection('users')
         .doc(userId)
-        .collection("devices")
+        .collection('devices')
         .doc(deviceId);
     return docRef.update({key: value});
   }

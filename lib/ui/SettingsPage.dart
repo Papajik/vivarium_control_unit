@@ -7,7 +7,7 @@ class SettingsPage extends StatelessWidget {
       appBar: AppBar(
         title: Text('Preferences Demo'),
       ),
-      body: Text("Unsupported"),
+      body: Text('Unsupported'),
     );
   }
 }

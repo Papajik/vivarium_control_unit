@@ -6,9 +6,9 @@ import 'package:vivarium_control_unit/models/waterHeaterType.dart';
 import 'package:vivarium_control_unit/ui/device/overview/animatedChart.dart';
 import 'package:vivarium_control_unit/ui/device/overview/iconRotation.dart';
 import 'package:vivarium_control_unit/ui/device/overview/overviewCard.dart';
-import 'package:vivarium_control_unit/utils/sensorValuesProvider.dart'
-    as SensorValues;
-import 'package:vivarium_control_unit/utils/sensorValuesProvider.dart';
+import 'package:vivarium_control_unit/utils/firebaseProvider.dart'
+    as sensor_values;
+import 'package:vivarium_control_unit/utils/firebaseProvider.dart';
 
 class DeviceOverviewSubpage extends StatefulWidget {
   final String deviceId;
@@ -24,17 +24,15 @@ class DeviceOverviewSubpage extends StatefulWidget {
 class _DeviceOverviewSubpageState extends State<DeviceOverviewSubpage> {
   @override
   void initState() {
-    SensorValues.deviceId = widget.deviceId;
-    SensorValues.userId = widget.userId;
     super.initState();
   }
 
   @override
   Widget build(BuildContext context) {
     return StreamBuilder(
-      stream: SensorValues.deviceHistoryStream(),
+      stream: sensor_values.deviceHistoryStream(widget.deviceId),
       builder: (context, deviceHistorySnapshot) => StreamBuilder(
-        stream: SensorValues.deviceStream(),
+        stream: sensor_values.deviceStream(widget.deviceId),
         builder: (context, deviceSnapshot) {
           return Scaffold(
               body: Padding(
@@ -51,33 +49,33 @@ class _DeviceOverviewSubpageState extends State<DeviceOverviewSubpage> {
     );
   }
 
-  List<StaggeredTile> _staggeredTiles = const <StaggeredTile>[
-    const StaggeredTile.count(4, 2), //Temperature
-    const StaggeredTile.count(4, 2), //Ph
-    const StaggeredTile.count(4, 2), //Water level
-    const StaggeredTile.count(2, 1), //Outlet 1
-    const StaggeredTile.count(2, 1), //Outlet 2
-    const StaggeredTile.count(2, 1), //Feeding
-    const StaggeredTile.count(2, 1), //Lights
-    const StaggeredTile.count(2, 1), //Fan
-    const StaggeredTile.count(2, 1), //Heater
+  final List<StaggeredTile> _staggeredTiles = const <StaggeredTile>[
+    StaggeredTile.count(4, 2), //Temperature
+    StaggeredTile.count(4, 2), //Ph
+    StaggeredTile.count(4, 2), //Water level
+    StaggeredTile.count(2, 1), //Outlet 1
+    StaggeredTile.count(2, 1), //Outlet 2
+    StaggeredTile.count(2, 1), //Feeding
+    StaggeredTile.count(2, 1), //Lights
+    StaggeredTile.count(2, 1), //Fan
+    StaggeredTile.count(2, 1), //Heater
   ];
 
-  _createHistoryTiles(AsyncSnapshot<dynamic> snapshot) {
+  List<Widget> _createHistoryTiles(AsyncSnapshot<dynamic> snapshot) {
     List history;
     if (snapshot.hasData) history = snapshot.data.data()['sensorValuesHistory'];
 
     return <Widget>[
       OverviewCard(
-        title: "Temperature",
+        title: 'Temperature',
         additionalHeaders: [
           "T1: ${snapshot.hasData ? getLastValue(history, 'waterTemperature1') : "..."} °C",
           "T2: ${snapshot.hasData ? getLastValue(history, 'waterTemperature2') : "..."} °C"
         ],
         body: snapshot.hasData
             ? AnimatedChart(lines: [
-                SensorValues.getHistoryDoubleMap(history, "waterTemperature1"),
-                SensorValues.getHistoryDoubleMap(history, "waterTemperature2")
+                sensor_values.getHistoryDoubleMap(history, 'waterTemperature1'),
+                sensor_values.getHistoryDoubleMap(history, 'waterTemperature2')
               ], colors: [
                 Colors.red,
                 Colors.blue
@@ -89,25 +87,28 @@ class _DeviceOverviewSubpageState extends State<DeviceOverviewSubpage> {
         key: UniqueKey(),
       ),
       OverviewCard(
-          title: "Water pH",
+          title: 'Water pH',
           additionalHeaders: [
-            "pH: ${snapshot.hasData ? SensorValues.getLastValue(history, 'waterPh') : "..."}"
-          ],
-          body: snapshot.hasData
-              ? AnimatedChart(
-                  lines: [SensorValues.getHistoryDoubleMap(history, 'waterPh')],
-                  colors: [Colors.red],
-                  units: [''])
-              : Center(child: CircularProgressIndicator()),
-          key: UniqueKey()),
-      OverviewCard(
-          title: "Water level",
-          additionalHeaders: [
-            "Level: ${snapshot.hasData ? SensorValues.getLastValue(history, 'waterLevel') : "..."} cm"
+            "pH: ${snapshot.hasData ? sensor_values.getLastValue(history, 'waterPh') : "..."}"
           ],
           body: snapshot.hasData
               ? AnimatedChart(lines: [
-                  SensorValues.getHistoryDoubleMap(history, 'waterLevel')
+                  sensor_values.getHistoryDoubleMap(history, 'waterPh')
+                ], colors: [
+                  Colors.red
+                ], units: [
+                  ''
+                ])
+              : Center(child: CircularProgressIndicator()),
+          key: UniqueKey()),
+      OverviewCard(
+          title: 'Water level',
+          additionalHeaders: [
+            "Level: ${snapshot.hasData ? sensor_values.getLastValue(history, 'waterLevel') : "..."} cm"
+          ],
+          body: snapshot.hasData
+              ? AnimatedChart(lines: [
+                  sensor_values.getHistoryDoubleMap(history, 'waterLevel')
                 ], colors: [
                   Colors.red
                 ], units: [
@@ -118,7 +119,7 @@ class _DeviceOverviewSubpageState extends State<DeviceOverviewSubpage> {
     ];
   }
 
-  _createStateTiles(AsyncSnapshot<dynamic> snapshot) {
+  List<Widget> _createStateTiles(AsyncSnapshot<dynamic> snapshot) {
     Map<String, dynamic> device;
     if (snapshot.hasData) device = snapshot.data.data();
     print(Colors.red.value);
@@ -132,136 +133,137 @@ class _DeviceOverviewSubpageState extends State<DeviceOverviewSubpage> {
     ];
   }
 
-  _buildOutlet1(bool hasData, Map<String, dynamic> device) {
+  OverviewCard _buildOutlet1(bool hasData, Map<String, dynamic> device) {
     return OverviewCard(
-        title: "Outlet 1",
+        title: 'Outlet 1',
         body: TriggerCardBody(
           icon: (hasData &&
-                  SensorValues.getStateValue(device, 'powerOutletOneOn'))
+                  sensor_values.getStateValue(device, 'powerOutletOneOn'))
               ? Icon(Icons.power, color: Colors.orangeAccent)
               : Icon(Icons.power_off),
           nextTriggerTime: hasData
-              ? SensorValues.getNextTriggerTime(
+              ? sensor_values.getNextTriggerTime(
                   device, 'powerOutletOneTriggers')
-              : "...",
+              : '...',
           nextChange: hasData
-              ? SensorValues.getNextTriggerValue(
+              ? sensor_values.getNextTriggerValue(
                       device, 'powerOutletOneTriggers', 'outletOn')
-                  ? Text("Turn ON")
-                  : Text("Turn OFF")
-              : Text("..."),
+                  ? Text('Turn ON')
+                  : Text('Turn OFF')
+              : Text('...'),
         ));
   }
 
-  _buildOutlet2(bool hasData, Map<String, dynamic> device) {
+  OverviewCard _buildOutlet2(bool hasData, Map<String, dynamic> device) {
     return OverviewCard(
-        title: "Outlet 1",
+        title: 'Outlet 1',
         body: TriggerCardBody(
           icon: (hasData &&
-                  SensorValues.getStateValue(device, 'powerOutletTwoOn'))
+                  sensor_values.getStateValue(device, 'powerOutletTwoOn'))
               ? Icon(Icons.power, color: Colors.orangeAccent)
               : Icon(Icons.power_off),
           nextTriggerTime: hasData
-              ? SensorValues.getNextTriggerTime(
+              ? sensor_values.getNextTriggerTime(
                   device, 'powerOutletTwoTriggers')
-              : "...",
+              : '...',
           nextChange: hasData
-              ? SensorValues.getNextTriggerValue(
+              ? sensor_values.getNextTriggerValue(
                       device, 'powerOutletTwoTriggers', 'outletOn')
-                  ? Text("Turn ON")
-                  : Text("Turn OFF")
-              : Text("..."),
+                  ? Text('Turn ON')
+                  : Text('Turn OFF')
+              : Text('...'),
         ));
   }
 
-  _buildFeed(bool hasData, Map<String, dynamic> device) {
+  OverviewCard _buildFeed(bool hasData, Map<String, dynamic> device) {
     return OverviewCard(
       title:
-          "Feed ${hasData ? "(${SensorValues.getNumberOfTriggers(device, 'feedTriggers')})" : ""}",
+          "Feed ${hasData ? "(${sensor_values.getNumberOfTriggers(device, 'feedTriggers')})" : ""}",
       background: Colors.grey.shade200,
       body: Padding(
         padding: const EdgeInsets.only(top: 8.0),
         child: Column(
           children: [
             Text(
-                "Last feeding: ${hasData ? SensorValues.getLastTrigger(device, 'feedTriggers') : "..."}"),
+                "Last feeding: ${hasData ? sensor_values.getLastTrigger(device, 'feedTriggers') : "..."}"),
             SizedBox(
               height: 10,
             ),
             Text(
-                "Next feeding: ${hasData ? SensorValues.getNextTriggerTime(device, 'feedTriggers') : "..."}")
+                "Next feeding: ${hasData ? sensor_values.getNextTriggerTime(device, 'feedTriggers') : "..."}")
           ],
         ),
       ),
     );
   }
 
-  _buildLED(bool hasData, Map<String, dynamic> device) {
+  OverviewCard _buildLED(bool hasData, Map<String, dynamic> device) {
     return OverviewCard(
         title:
-            "LED ${hasData ? "(${SensorValues.getNumberOfTriggers(device, 'ledTriggers')})" : ""}",
+            "LED ${hasData ? "(${sensor_values.getNumberOfTriggers(device, 'ledTriggers')})" : ""}",
         body: TriggerCardBody(
-          icon: hasData && SensorValues.getStateValue(device, 'ledOn')
+          icon: hasData && sensor_values.getStateValue(device, 'ledOn')
               ? Icon(Icons.lightbulb,
-                  color: Color(SensorValues.getStateValue(device, 'ledColor')))
+                  color: Color(sensor_values.getStateValue(device, 'ledColor')))
               : Icon(Icons.lightbulb_outline),
           nextTriggerTime: hasData
-              ? SensorValues.getNextTriggerTime(device, 'ledTriggers')
-              : "...",
+              ? sensor_values.getNextTriggerTime(device, 'ledTriggers')
+              : '...',
           nextChange: hasData
-              ? (SensorValues.getNextTriggerValue(
+              ? (sensor_values.getNextTriggerValue(
                           device, 'ledTriggers', 'color') as int ==
                       0)
-                  ? Text("Turn OFF")
+                  ? Text('Turn OFF')
                   : ClipOval(
                       child: Container(
                           height: 20,
                           width: 20,
-                          color: Color((SensorValues.getNextTriggerValue(
+                          color: Color((sensor_values.getNextTriggerValue(
                               device, 'ledTriggers', 'color')))),
                     )
-              : Text("..."),
+              : Text('...'),
         ));
   }
 
-  _buildFan(bool hasData, Map<String, dynamic> device) {
+  OverviewCard _buildFan(bool hasData, Map<String, dynamic> device) {
     return OverviewCard(
-      title: "Fan",
+      title: 'Fan',
       body: CardBody(
         icon: IconRotation(
           icon: FaIcon(FontAwesomeIcons.fan),
           speed: hasData
-              ? SensorValues.getStateValue(device, 'fanSpeed') + .0
+              ? sensor_values.getStateValue(device, 'fanSpeed') + .0
               : 0.0,
         ),
         children: [
           hasData
               ? Text(
-                  "Fan speed: ${SensorValues.getStateValue(device, 'fanSpeed')} %")
-              : Text("Fan speed: 0 %")
+                  "Fan speed: ${sensor_values.getStateValue(device, 'fanSpeed')} %")
+              : Text('Fan speed: 0 %')
         ],
       ),
     );
   }
 
-  _buildHeater(bool hasData, Map<String, dynamic> device) {
-    String status = "...";
-    String type = HeaterType.values[0].text;
+  OverviewCard _buildHeater(bool hasData, Map<String, dynamic> device) {
+    var status = '...';
+    var type = HeaterType.values[0].text;
     if (hasData) {
-      status = SensorValues.getStateValue(device, "waterHeaterOn")?"ON":"OFF";
+      status =
+          sensor_values.getStateValue(device, 'waterHeaterOn') ? 'ON' : 'OFF';
       type = HeaterType
-          .values[SensorValues.getStateValue(device, "waterHeaterType")].text;
+          .values[sensor_values.getStateValue(device, 'waterHeaterType')].text;
     }
     return OverviewCard(
-      title: "Heater",
+      title: 'Heater',
       body: CardBody(
         icon: Icon(Icons.local_fire_department),
         children: [
-          Text("Heater status: $status"),
+          Text('Heater status: $status'),
           SizedBox(
             height: 10,
           ),
-          Text("Heater type: $type")
+          Text('Heater type: $type')
         ],
       ),
     );

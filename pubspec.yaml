@@ -24,7 +24,7 @@ dependencies:
   firebase_auth_web: ^0.3.1
   cloud_firestore: ^0.14.1+2
   google_sign_in: ^4.5.4
-  flutter_blue: ^0.7.2
+  flutter_blue: ^0.7.3
   flutter_bluetooth_serial: ^0.2.2
   toast: ^0.1.5
   fluttertoast: ^7.1.1
@@ -54,6 +54,7 @@ dependencies:
 dev_dependencies:
   hive_generator: ^0.8.1
   build_runner: ^1.10.3
+  pedantic: ^1.9.2
   flutter_test:
     sdk: flutter
 

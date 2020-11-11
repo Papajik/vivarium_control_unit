@@ -41,7 +41,7 @@ class LocationTile extends StatelessWidget {
       ),
       onTap: () {
         Navigator.of(context)
-            .push(MaterialPageRoute<Null>(builder: (BuildContext context) {
+            .push(MaterialPageRoute<void>(builder: (BuildContext context) {
           return new LocationPage(location: location, uid: userId);
         }));
       },

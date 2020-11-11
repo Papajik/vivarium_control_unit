@@ -22,8 +22,8 @@ class OutletTriggerList extends StatelessWidget {
           Hive.box<OutletTrigger>(boxName+ deviceId)
               .listenable(),
       builder: (context, Box<OutletTrigger> box, _) {
-        List<Widget> widgets = new List<Widget>();
-        List<OutletTrigger> list = box.values.toList();
+        var widgets = <Widget>[];
+        var list = box.values.toList();
         list.sort((a,b)=>a.time.compareTo(b.time));
         list.forEach((element) {
           widgets.add(OutletTriggerTile(
@@ -40,13 +40,13 @@ class OutletTriggerList extends StatelessWidget {
 
         });
         widgets.add(RaisedButton(
-          child: Text("Create new timer"),
+          child: Text('Create new timer'),
           onPressed: () {
             showDialog(
                 context: context,
                 builder: (context) {
                   return OutletTriggerDialog(
-                    title: "Add new outlet trigger",
+                    title: 'Add new outlet trigger',
                     trigger: null,
                     boxId: boxName+deviceId,
                     onChanged: onChanged,

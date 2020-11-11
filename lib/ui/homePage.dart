@@ -26,8 +26,8 @@ class _LoginPageState extends State<HomePage> {
         case 0:
           if (_signed) {
             Navigator.of(context)
-                .push(MaterialPageRoute<Null>(builder: (BuildContext context) {
-              return new LocationsPage(uid: userId);
+                .push(MaterialPageRoute<void>(builder: (BuildContext context) {
+              return new LocationsPage();
             }));
           } else {
             _showLogInWarning(context);
@@ -35,7 +35,7 @@ class _LoginPageState extends State<HomePage> {
           break;
         case 1:
           Navigator.of(context)
-              .push(MaterialPageRoute<Null>(builder: (BuildContext context) {
+              .push(MaterialPageRoute<void>(builder: (BuildContext context) {
             return new SettingsPage();
           }));
           break;

@@ -48,7 +48,7 @@ class Device {
             condition: data['info']['condition'],
             type: data['info']['type'],
             sensorValues: SensorData.fromJSON(
-                new Map<String, dynamic>.from(data['sensorValues'])),
+                Map<String, dynamic>.from(data['sensorValues'])),
             macAddress: data['info']['macAddress'],
             camera: Camera.fromJSON(data['camera']));
 

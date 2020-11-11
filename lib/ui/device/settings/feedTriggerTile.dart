@@ -85,11 +85,11 @@ class _SettingsFeedTileState extends State<SettingsFeedTile> {
   }
 
   void handleClick(String value, BuildContext context) async {
-    print("handle click");
+    print('handle click');
     print(value);
     switch (value) {
       case 'Edit':
-        showDialog(
+        await showDialog(
             context: context,
             builder: (BuildContext context) {
               return FeedTriggerDialog(

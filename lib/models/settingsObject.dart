@@ -115,8 +115,8 @@ class SettingsObject {
 
   SettingsObject.newEmpty()
       : this(
-            feedTriggers: new List(),
-            ledTriggers: new List(),
-            powerOutletOneTriggers: new List(),
-            powerOutletTwoTriggers: new List());
+            feedTriggers: [],
+            ledTriggers: [],
+            powerOutletOneTriggers: [],
+            powerOutletTwoTriggers: []);
 }
