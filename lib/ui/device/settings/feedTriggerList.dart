@@ -28,21 +28,21 @@ class _SettingsFeedListState extends State<SettingsFeedList> {
 
   @override
   Widget build(BuildContext context) {
-    print("feedTriggerList - build");
+    print('feedTriggerList - build');
     return ValueListenableBuilder(
       valueListenable:
           Hive.box<FeedTrigger>(HiveBoxes.feedTriggerList + widget.deviceId)
               .listenable(),
       builder: (context, Box<FeedTrigger> box, _) {
-        print("feedTriggerList - builder");
-        List<Widget> widgets = new List<Widget>();
-        List<FeedTrigger> list = box.values.toList();
+        print('feedTriggerList - builder');
+        var widgets = <Widget>[];
+        var list = box.values.toList();
         list.sort((a, b) => a.time.compareTo(b.time));
 
         list.forEach((element) {
           widgets.add(SettingsFeedTile(
             trigger: element,
-            onChanged: (val) => {widget.onChanged("")},
+            onChanged: (val) => {widget.onChanged('')},
           ));
           widgets.add(Divider(
             color: Colors.lightBlue,
@@ -54,7 +54,7 @@ class _SettingsFeedListState extends State<SettingsFeedList> {
         });
 
         widgets.add(RaisedButton(
-          child: Text("Create new timer"),
+          child: Text('Create new timer'),
           onPressed: () {
             showDialog(
                 context: context,

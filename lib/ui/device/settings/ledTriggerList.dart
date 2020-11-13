@@ -28,23 +28,23 @@ class _LedTriggerListState extends State<LedTriggerList> {
 
   @override
   Widget build(BuildContext context) {
-    print("building led trigger list");
+    print('building led trigger list');
     return ValueListenableBuilder(
       valueListenable:
           Hive.box<LedTrigger>(HiveBoxes.ledTriggerList + widget.deviceId)
               .listenable(),
       builder: (context, Box<LedTrigger> box, _) {
-        List<Widget> widgets = new List<Widget>();
-        List<LedTrigger> list = box.values.toList();
+        var widgets = <Widget>[];
+        var list = box.values.toList();
         list.sort((a, b) => a.time.compareTo(b.time));
-        print("Sorted list = $list");
+        print('Sorted list = $list');
         list.forEach((element) {
           widgets.add(LedTriggerTile(
               trigger: element,
               onChanged: (trigger) => {
-                    print("LedTriggerList - LedTriggerTile - onChanged"),
+                    print('LedTriggerList - LedTriggerTile - onChanged'),
                     widget.onChanged(trigger),
-                    setState(() => {print("LedTriggerList - setState")})
+                    setState(() => {print('LedTriggerList - setState')})
                   }));
           widgets.add(Divider(
             color: Colors.lightBlue,
@@ -56,13 +56,13 @@ class _LedTriggerListState extends State<LedTriggerList> {
         });
 
         widgets.add(RaisedButton(
-          child: Text("Create new timer"),
+          child: Text('Create new timer'),
           onPressed: () {
             showDialog(
                 context: context,
                 builder: (context) {
                   return LedTriggerDialog(
-                    title: "Add timer",
+                    title: 'Add timer',
                     trigger: null,
                     deviceId: widget.deviceId,
                     onChanged: widget.onChanged,

@@ -21,14 +21,14 @@ class FeedTriggerDialog extends StatefulWidget {
 
 class _FeedTriggerDialogState extends State<FeedTriggerDialog> {
   String newFeederType = FeedType.BOX.text;
-  String newFeederTime = "00:00";
+  String newFeederTime = '00:00';
 
   @override
   void initState() {
     if (widget.trigger != null) {
       newFeederType = getFeedTypeString(widget.trigger.type);
       newFeederTime = getHourFromTime(widget.trigger.time).toString() +
-          ":" +
+          ':' +
           getMinuteFromTime(widget.trigger.time).toString();
     }
     super.initState();
@@ -37,14 +37,14 @@ class _FeedTriggerDialogState extends State<FeedTriggerDialog> {
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
-      title: Text("New timer"),
+      title: Text('New timer'),
       content: Column(
         mainAxisSize: MainAxisSize.min,
         children: <Widget>[
           DateTimePicker(
               type: DateTimePickerType.time,
               initialValue: newFeederTime,
-              timeLabelText: "Time",
+              timeLabelText: 'Time',
               onChanged: (val) {
                 setState(() {
                   newFeederTime = val;
@@ -72,29 +72,29 @@ class _FeedTriggerDialogState extends State<FeedTriggerDialog> {
           shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.all(Radius.circular(5.0))),
           child: Text(
-            widget.trigger == null ? "Add timer" : "Save changes",
+            widget.trigger == null ? 'Add timer' : 'Save changes',
             style: TextStyle(color: Colors.white, fontSize: 20),
           ),
           onPressed: () async {
-            print("saving trigger");
-            var t = newFeederTime.split(":");
+            print('saving trigger');
+            var t = newFeederTime.split(':');
 
             if (widget.trigger != null) {
               widget.trigger.time = getTime(int.parse(t[0]), int.parse(t[1]));
               widget.trigger.type = getIndexOfFeedType(newFeederType);
               await widget.trigger.save();
-              print("saved");
-              widget.onChanged("");
+              print('saved');
+              widget.onChanged('');
               Navigator.pop(context);
               return;
             } else {
-              Box<FeedTrigger> box =
+              var box =
                   Hive.box(HiveBoxes.feedTriggerList + widget.deviceId);
               await box.add(FeedTrigger(
                   type: getIndexOfFeedType(newFeederType),
                   time: getTime(int.parse(t[0]), int.parse(t[1]))));
             }
-            widget.onChanged("");
+            widget.onChanged('');
             Navigator.pop(context);
             return;
           },

@@ -13,20 +13,20 @@ class DeviceList extends StatelessWidget {
   Widget build(BuildContext context) {
     return StreamBuilder<QuerySnapshot>(
       stream: FirebaseFirestore.instance
-          .collection("users")
+          .collection('users')
           .doc(userId)
-          .collection("devices")
-          .where("info.location", isEqualTo: locationId)
-          .where("info.active", isEqualTo: true)
+          .collection('devices')
+          .where('info.location', isEqualTo: locationId)
+          .where('info.active', isEqualTo: true)
           .snapshots(),
       builder: (context, snapshot) {
         if (snapshot.hasError) {
-          return new Text('Error: ${snapshot.error}');
+          return Text('Error: ${snapshot.error}');
         }
         if (!snapshot.hasData) {
           return Center(child: CircularProgressIndicator());
         }
-        return new ListView(
+        return ListView(
           children: snapshot.data.docs.map((document) {
             return DeviceTile(
               device:Device.fromJSON(document.data()),

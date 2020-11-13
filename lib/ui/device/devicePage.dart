@@ -1,19 +1,16 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_blue/flutter_blue.dart';
 import 'package:flutter_bluetooth_serial/flutter_bluetooth_serial.dart' as bs;
-import 'package:hive/hive.dart';
 import 'package:vivarium_control_unit/Constants.dart';
 import 'package:vivarium_control_unit/models/device.dart';
-import 'package:vivarium_control_unit/models/feedTrigger.dart';
-import 'package:vivarium_control_unit/models/ledTrigger.dart';
-import 'package:vivarium_control_unit/models/outletTrigger.dart';
 import 'package:vivarium_control_unit/ui/device/camera/deviceViewSubpage.dart';
 import 'package:vivarium_control_unit/ui/device/overview/deviceOverviewSubpage.dart';
 import 'package:vivarium_control_unit/ui/device/settings/deviceSettingsSubpage.dart';
 import 'package:vivarium_control_unit/utils/auth.dart';
 import 'package:vivarium_control_unit/utils/bluetoothProvider.dart';
-import 'package:vivarium_control_unit/utils/hiveBoxes.dart';
+import 'package:vivarium_control_unit/utils/settingsConverter.dart';
 
 class DevicePage extends StatefulWidget {
   final Device device;
@@ -25,14 +22,19 @@ class DevicePage extends StatefulWidget {
 }
 
 class _DevicePage extends State<DevicePage> {
-  BluetoothHandler _bluetoothHandler;
+  BluetoothProvider _bluetoothProvider;
+  SettingsConverter _settingsConverter;
   StreamSubscription<bs.BluetoothState> subscription;
 
   @override
   void initState() {
     super.initState();
-    _bluetoothHandler =
-        BluetoothHandler(widget.device.macAddress, widget.device.name);
+    _bluetoothProvider = BluetoothProvider(
+        id: widget.device.macAddress, name: widget.device.name);
+
+
+ _settingsConverter =
+        SettingsConverter(userId: userId, deviceId: widget.device.macAddress);
 
     ///Whenever is bluetooth state changed, rebuild widget
     subscription = bs.FlutterBluetoothSerial.instance
@@ -44,7 +46,7 @@ class _DevicePage extends State<DevicePage> {
 
   @override
   void dispose() {
-    _bluetoothHandler.disconnectDevice();
+    _bluetoothProvider.disconnectBluetoothDevice();
     subscription.cancel();
     super.dispose();
   }
@@ -75,21 +77,11 @@ class _DevicePage extends State<DevicePage> {
           body: TabBarView(
             children: [
               DeviceOverviewSubpage(userId: userId, deviceId: widget.device.id),
-              FutureBuilder(
-                future: _initializeHive(),
-                builder: (context, snapshot) {
-                  if (!snapshot.hasData) {
-                    return Container(
-                      child: Text(''),
-                    );
-                  }
-                  return DeviceSettingsSubpage(
-                      useCloud: true,
-                      userId: userId,
-                      deviceId: widget.device.id,
-                      bluetoothHandler: _bluetoothHandler);
-                },
-              ),
+              DeviceSettingsSubpage(
+                  settingsConverter: _settingsConverter,
+                  userId: userId,
+                  deviceId: widget.device.id,
+                  bluetoothProvider: _bluetoothProvider),
               DeviceViewSubpage(userId: userId, device: widget.device),
             ],
           ),
@@ -104,46 +96,69 @@ class _DevicePage extends State<DevicePage> {
               snapshot.data == bs.BluetoothState.STATE_BLE_ON)) {
             return IconButton(
               icon: Icon(Icons.bluetooth),
-              onPressed: () => bs.FlutterBluetoothSerial.instance.requestEnable(),
+              onPressed: () =>
+                  bs.FlutterBluetoothSerial.instance.requestEnable(),
             );
           }
           return buildConnectButton(context);
         });
   }
 
-  buildConnectButton(BuildContext context) {
-    return StreamBuilder(
-      stream: _bluetoothHandler.device(),
+  StreamBuilder buildConnectButton(BuildContext context) {
+    return StreamBuilder<BluetoothDeviceState>(
+      stream: _bluetoothProvider.deviceStateStream,
       builder: (context, snapshot) {
         if (!snapshot.hasData) {
-          return IconButton(
-            icon: Icon(Icons.insert_link, color: Colors.white),
-            onPressed: _bluetoothHandler.isConnecting()
-                ? null
-                : () async {
-                    await _bluetoothHandler.connectDevice();
-                  },
-          );
+          return SizedBox.shrink();
         }
         return IconButton(
-          icon: Icon(Icons.link_off, color: Colors.orange),
-          onPressed: () async {
-            await _bluetoothHandler.disconnectDevice();
-            setState(() {});
-          },
-        );
+            icon: _icon(snapshot.data), onPressed: _onPressed(snapshot.data));
       },
     );
+
+//    return StreamBuilder(
+//      stream: _bluetoothHandler.device(),
+//      builder: (context, snapshot) {
+//        if (!snapshot.hasData) {
+//          return IconButton(
+//            icon: Icon(Icons.insert_link, color: Colors.white),
+//            onPressed: _bluetoothHandler.isConnecting()
+//                ? null
+//                : () async {
+//                    await _bluetoothHandler.connectDevice();
+//                  },
+//          );
+//        }
+//        return IconButton(
+//          icon: Icon(Icons.link_off, color: Colors.orange),
+//          onPressed: () async {
+//            await _bluetoothHandler.disconnectDevice();
+//            setState(() {});
+//          },
+//        );
+//      },
+//    );
   }
 
-  Future<bool> _initializeHive() async {
-    await Hive.openBox<FeedTrigger>(
-        HiveBoxes.feedTriggerList + widget.device.id);
-    await Hive.openBox<LedTrigger>(HiveBoxes.ledTriggerList + widget.device.id);
-    await Hive.openBox<OutletTrigger>(
-        HiveBoxes.outletOneTriggerList + widget.device.id);
-    await Hive.openBox<OutletTrigger>(
-        HiveBoxes.outletTwoTriggerList + widget.device.id);
-    return true;
+  Function _onPressed(BluetoothDeviceState state) {
+    if (state == BluetoothDeviceState.connected) {
+      return ()=>{_bluetoothProvider.disconnectBluetoothDevice()};
+    }
+
+    if (state == BluetoothDeviceState.disconnected){
+      return ()=>{_bluetoothProvider.connectBluetoothDevice()};
+    }
+    return null;
   }
+
+  Widget _icon(BluetoothDeviceState state) {
+    if (state == BluetoothDeviceState.connected) {
+      return Icon(Icons.link_off, color: Colors.orange);
+    } else {
+      return Icon(Icons.insert_link, color: Colors.white);
+    }
+  }
+
+
+
 }

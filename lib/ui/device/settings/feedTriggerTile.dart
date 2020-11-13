@@ -56,11 +56,11 @@ class _SettingsFeedTileState extends State<SettingsFeedTile> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        "Type",
+                        'Type',
                         style: TextStyle(fontSize: 10),
                       ),
                       Text(
-                        widget.trigger.type.toString().split(".").last,
+                        widget.trigger.type.toString().split('.').last,
                         style: TextStyle(
                           fontSize: 25,
                         ),
@@ -100,17 +100,17 @@ class _SettingsFeedTileState extends State<SettingsFeedTile> {
         break;
       case 'Delete':
         await widget.trigger.delete();
-        print("delete");
-        widget.onChanged("");
+        print('delete');
+        widget.onChanged('');
         break;
     }
   }
 
   String getWidgetTime() {
-    String lsHour =
+    var lsHour =
         getHourFromTime(widget.trigger.time).toString().padLeft(2, '0');
-    String lsMinute =
+    var lsMinute =
         getMinuteFromTime(widget.trigger.time).toString().padLeft(2, '0');
-    return lsHour + ":" + lsMinute;
+    return lsHour + ':' + lsMinute;
   }
 }

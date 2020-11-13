@@ -12,22 +12,23 @@ class HomePage extends StatefulWidget {
 
 class _LoginPageState extends State<HomePage> {
   bool _signed = false;
-  String _userName = "";
+  String _userName = '';
 
   @override
   Widget build(BuildContext context) {
+    // ignore: always_declare_return_types
     _showLogInWarning(context) {
       Toast.show(Constants.of(context).signInWarningText, context,
           duration: Toast.LENGTH_SHORT, gravity: Toast.BOTTOM);
     }
 
-    _onTap(int index) {
+    void _onTap(int index) {
       switch (index) {
         case 0:
           if (_signed) {
             Navigator.of(context)
                 .push(MaterialPageRoute<void>(builder: (BuildContext context) {
-              return new LocationsPage();
+              return LocationsPage();
             }));
           } else {
             _showLogInWarning(context);
@@ -36,7 +37,7 @@ class _LoginPageState extends State<HomePage> {
         case 1:
           Navigator.of(context)
               .push(MaterialPageRoute<void>(builder: (BuildContext context) {
-            return new SettingsPage();
+            return SettingsPage();
           }));
           break;
       }
@@ -44,14 +45,14 @@ class _LoginPageState extends State<HomePage> {
 
     return Scaffold(
       appBar: AppBar(
-        title: Text("Vivarium control"),
+        title: Text('Vivarium control'),
         actions: <Widget>[
           FlatButton.icon(
             icon: Padding(
               child: Image(
                 image:_signed
                     ? Image.network(imageUrl).image
-                    : AssetImage("assets/google_logo.png"),
+                    : AssetImage('assets/google_logo.png'),
                 color:null,
                 alignment: Alignment.center,
                 fit: BoxFit.scaleDown,
@@ -63,7 +64,7 @@ class _LoginPageState extends State<HomePage> {
               if (!_signed) {
                 signInWithGoogle().whenComplete(() {
                   setState(() {
-                    _userName = name + " - " + Constants.of(context).logoutText;
+                    _userName = name + ' - ' + Constants.of(context).logoutText;
                     _signed = true;
                   });
                 });
@@ -95,12 +96,12 @@ class _LoginPageState extends State<HomePage> {
         items: <BottomNavigationBarItem>[
           BottomNavigationBarItem(
             icon: Icon(Icons.location_on),
-            label: "Locations",
+            label: 'Locations',
             backgroundColor: Colors.blue,
           ),
           BottomNavigationBarItem(
               icon: Icon(Icons.settings),
-              label: "Settings",
+              label: 'Settings',
               backgroundColor: Colors.blue),
         ],
         onTap: _onTap,

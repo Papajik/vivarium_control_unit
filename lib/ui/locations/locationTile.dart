@@ -14,11 +14,11 @@ class LocationTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ListTile(
-      title: Text(location.name ?? "Unknown location"),
-      subtitle: Text(location.deviceCount.toString() + " devices"),
+      title: Text(location.name ?? 'Unknown location'),
+      subtitle: Text(location.deviceCount.toString() + ' devices'),
       trailing: Column(
         children: <Widget>[
-          Text("Last update"),
+          Text('Last update'),
           Text(location.lastUpdate.toDate().toIso8601String()),
           Text(location.id)
         ],
@@ -42,7 +42,7 @@ class LocationTile extends StatelessWidget {
       onTap: () {
         Navigator.of(context)
             .push(MaterialPageRoute<void>(builder: (BuildContext context) {
-          return new LocationPage(location: location, uid: userId);
+          return LocationPage(location: location, uid: userId);
         }));
       },
       onLongPress: () {},

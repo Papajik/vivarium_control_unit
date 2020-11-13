@@ -20,9 +20,9 @@ class TriggerDialogContainer extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    print("triggerDialogContainer");
+    print('triggerDialogContainer');
     return AlertDialog(
-      title: Text("New timer"),
+      title: Text('New timer'),
       content: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: <Widget>[
@@ -31,7 +31,7 @@ class TriggerDialogContainer extends StatelessWidget {
             child: DateTimePicker(
                 type: DateTimePickerType.time,
                 initialValue: getTimeStringFromTime(selectedTime),
-                timeLabelText: "Time",
+                timeLabelText: 'Time',
                 onChanged: onTimeChanged,
                 icon: Icon(Icons.access_time)),
           ),

@@ -25,7 +25,7 @@ class _LedColorDialogState extends State<LedColorDialog> {
   Widget build(BuildContext context) {
     return AlertDialog(
         contentPadding: const EdgeInsets.all(6.0),
-        title: Text("Pick a Color"),
+        title: Text('Pick a Color'),
         content: MaterialColorPicker(
           selectedColor: selectedColor,
           onColorChange: (color) =>

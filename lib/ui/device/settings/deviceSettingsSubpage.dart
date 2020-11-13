@@ -3,7 +3,7 @@ import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:flutter_blue/flutter_blue.dart';
 import 'package:flutter_settings_screens/flutter_settings_screens.dart'
-    as SettingsScreen;
+    as settings_screen;
 import 'package:vivarium_control_unit/Constants.dart';
 import 'package:vivarium_control_unit/models/waterHeaterType.dart';
 import 'package:vivarium_control_unit/ui/device/settings/feedTriggerList.dart';
@@ -16,36 +16,50 @@ import 'package:vivarium_control_unit/utils/settingsConverter.dart';
 class DeviceSettingsSubpage extends StatefulWidget {
   final String deviceId;
   final String userId;
-  final BluetoothHandler bluetoothHandler;
-  @required
-  final bool useCloud;
+  final BluetoothProvider bluetoothProvider;
+  final SettingsConverter settingsConverter;
 
-  DeviceSettingsSubpage(
-      {Key key,
-      this.deviceId,
-      this.userId,
-      this.bluetoothHandler,
-      this.useCloud})
-      : super(key: key);
+  DeviceSettingsSubpage({
+    Key key,
+    this.deviceId,
+    this.userId,
+    this.bluetoothProvider,
+    this.settingsConverter,
+  }) : super(key: key);
 
   @override
   _DeviceSettingsSubpageState createState() => _DeviceSettingsSubpageState();
 }
 
 class _DeviceSettingsSubpageState extends State<DeviceSettingsSubpage> {
-  SettingsConverter _settingsConverter;
   bool sendingToBluetooth = false;
+  SettingsConverter _settingsConverter;
 
   @override
   void initState() {
+    _settingsConverter = widget.settingsConverter;
     super.initState();
-    _settingsConverter =
-        new SettingsConverter(deviceId: widget.deviceId, userId: widget.userId);
   }
 
   @override
   Widget build(BuildContext context) {
-    return _createSettingList();
+    if (_settingsConverter.initialized) {
+      return _createSettingList();
+    } else {
+      return StreamBuilder(
+        stream: _settingsConverter.initializedStream,
+        builder: (context, snapshot) {
+          if (!snapshot.hasData || !snapshot.data) {
+            print('data= ${snapshot.data}');
+            return Center(
+              child: CircularProgressIndicator(),
+            );
+          } else {
+            return _createSettingList();
+          }
+        },
+      );
+    }
   }
 
   Widget _createSettingList() {
@@ -54,12 +68,13 @@ class _DeviceSettingsSubpageState extends State<DeviceSettingsSubpage> {
 
       ///TODO load settings for whole device page, not only settings
       builder: (context, snapshot) {
-        print("Settings Subpage - builder = Has data = " +
+        print('Settings Subpage - builder = Has data = ' +
             snapshot.hasData.toString());
-        if (!snapshot.hasData)
+        if (!snapshot.hasData) {
           return Center(
             child: CircularProgressIndicator(),
           );
+        }
         return createColumns();
       },
     );
@@ -84,25 +99,25 @@ class _DeviceSettingsSubpageState extends State<DeviceSettingsSubpage> {
     );
   }
 
-  _createWaterLevelGroup() {
-    return SettingsScreen.SettingsGroup(
+  settings_screen.SettingsGroup _createWaterLevelGroup() {
+    return settings_screen.SettingsGroup(
       title: Constants.of(context).settingsWaterLevelTitle,
       children: [
-        SettingsScreen.TextInputSettingsTile(
+        settings_screen.TextInputSettingsTile(
           title: Constants.of(context).settingsWaterLevelSensorHeight,
           initialValue: _settingsConverter
               .getValueFromBox(widget.deviceId + WATER_LEVEL_SENSOR_HEIGHT),
           settingKey: widget.deviceId + WATER_LEVEL_SENSOR_HEIGHT,
           obscureText: false,
           validator: (String height) {
-            return int.tryParse(height) != null ? null : "Input must be number";
+            return int.tryParse(height) != null ? null : 'Input must be number';
           },
           borderColor: Colors.lightBlueAccent,
           errorColor: Colors.orangeAccent,
           onChange: (val) async => await _settingsConverter.saveItem(
               WATER_LEVEL_SENSOR_HEIGHT, int.parse(val)),
         ),
-        SettingsScreen.TextInputSettingsTile(
+        settings_screen.TextInputSettingsTile(
           title: Constants.of(context).settingsWaterLevelMaxHeight,
           initialValue: _settingsConverter
               .getValueFromBox(widget.deviceId + WATER_LEVEL_MAX_HEIGHT),
@@ -118,7 +133,7 @@ class _DeviceSettingsSubpageState extends State<DeviceSettingsSubpage> {
                 WATER_LEVEL_MAX_HEIGHT, int.parse(val));
           },
         ),
-        SettingsScreen.TextInputSettingsTile(
+        settings_screen.TextInputSettingsTile(
           title: Constants.of(context).settingsWaterLevelMinHeight,
           initialValue: _settingsConverter
               .getValueFromBox(widget.deviceId + WATER_LEVEL_MIN_HEIGHT),
@@ -138,34 +153,34 @@ class _DeviceSettingsSubpageState extends State<DeviceSettingsSubpage> {
     );
   }
 
-  _createLedGroup() {
-    return SettingsScreen.SettingsGroup(
-      title: "LED",
+  settings_screen.SettingsGroup _createLedGroup() {
+    return settings_screen.SettingsGroup(
+      title: 'LED',
       children: [
-        SettingsScreen.ColorPickerSettingsTile(
-          title: "Current color",
-          settingKey: widget.deviceId + LED_COLOR + "string",
+        settings_screen.ColorPickerSettingsTile(
+          title: 'Current color',
+          settingKey: widget.deviceId + LED_COLOR + 'string',
           onChange: (Color value) async {
-            print("deviceSettingsSubpage - color changed");
+            print('deviceSettingsSubpage - color changed');
             await _settingsConverter.saveItem(LED_COLOR, value.value);
           },
         ),
-        SettingsScreen.SwitchSettingsTile(
+        settings_screen.SwitchSettingsTile(
           settingKey: widget.deviceId + LED_ON,
-          title: "Lights on",
+          title: 'Lights on',
           onChange: (value) async {
             await _settingsConverter.saveItem(LED_ON, value);
           },
         ),
-        SettingsScreen.ExpandableSettingsTile(
-          title: "LED Triggers",
+        settings_screen.ExpandableSettingsTile(
+          title: 'LED Triggers',
           children: [
             LedTriggerList(
               deviceId: widget.deviceId,
               onChanged: (trigger) async {
                 if (trigger != null) {
                   print(
-                      "deviceSettingsSubpage - ledTriggerList, saving trigger = $trigger");
+                      'deviceSettingsSubpage - ledTriggerList, saving trigger = $trigger');
                   await trigger.save();
                 }
                 await _settingsConverter.saveItemToCloud(
@@ -182,12 +197,12 @@ class _DeviceSettingsSubpageState extends State<DeviceSettingsSubpage> {
     );
   }
 
-  _createFeederGroup() {
-    return SettingsScreen.SettingsGroup(
-      title: "Feeder",
+  settings_screen.SettingsGroup _createFeederGroup() {
+    return settings_screen.SettingsGroup(
+      title: 'Feeder',
       children: [
-        SettingsScreen.ExpandableSettingsTile(
-          title: "Feeding times",
+        settings_screen.ExpandableSettingsTile(
+          title: 'Feeding times',
           children: [
             SettingsFeedList(
               deviceId: widget.deviceId,
@@ -199,7 +214,7 @@ class _DeviceSettingsSubpageState extends State<DeviceSettingsSubpage> {
                         .map((e) => e.toJson())
                         .toList());
                 setState(() {
-                  print("deviceSettingsSubpage - changing state");
+                  print('deviceSettingsSubpage - changing state');
                 });
               },
             ),
@@ -209,12 +224,12 @@ class _DeviceSettingsSubpageState extends State<DeviceSettingsSubpage> {
     );
   }
 
-  _createWaterTemperatureGroup() {
-    return SettingsScreen.SettingsGroup(
-      title: "Water temperature",
+  settings_screen.SettingsGroup _createWaterTemperatureGroup() {
+    return settings_screen.SettingsGroup(
+      title: 'Water temperature',
       children: [
-        SettingsScreen.SliderSettingsTile(
-          title: "Optimal temperature",
+        settings_screen.SliderSettingsTile(
+          title: 'Optimal temperature',
           settingKey: widget.deviceId + WATER_OPTIMAL_TEMPERATURE,
           min: 15,
           max: 35,
@@ -223,15 +238,15 @@ class _DeviceSettingsSubpageState extends State<DeviceSettingsSubpage> {
           onChangeEnd: (val) async =>
               await _settingsConverter.saveItem(WATER_OPTIMAL_TEMPERATURE, val),
         ),
-        SettingsScreen.SimpleRadioSettingsTile(
-            title: "Heater mode",
+        settings_screen.SimpleRadioSettingsTile(
+            title: 'Heater mode',
             //   subtitle: _settingsConverter.getValueFromBox(widget.deviceId + WATER_HEATER_TYPE).toString(),
             settingKey: widget.deviceId + WATER_HEATER_TYPE,
             selected: _settingsConverter
                 .getValueFromBox(widget.deviceId + WATER_HEATER_TYPE),
             values: HeaterType.values.map((e) => e.text).toList(),
             onChange: (val) async => {
-                  print("Saving in SimpleRadioSettingsTile, val = $val"),
+                  print('Saving in SimpleRadioSettingsTile, val = $val'),
                   await _settingsConverter.saveToCache(WATER_HEATER_TYPE, val),
                   await _settingsConverter.saveItemToCloud(
                       WATER_HEATER_TYPE, getIndexOfHeaterTypeFromString(val))
@@ -240,27 +255,27 @@ class _DeviceSettingsSubpageState extends State<DeviceSettingsSubpage> {
     );
   }
 
-  _createWaterPHGroup() {
-    return SettingsScreen.SettingsGroup(
-      title: "Water PH ",
+  settings_screen.SettingsGroup _createWaterPHGroup() {
+    return settings_screen.SettingsGroup(
+      title: 'Water PH ',
       children: [
-        SettingsScreen.SliderSettingsTile(
+        settings_screen.SliderSettingsTile(
           min: 0,
           max: 14,
           step: 0.1,
           defaultValue: 7,
-          title: "Max PH",
+          title: 'Max PH',
           settingKey: widget.deviceId + WATER_MAX_PH,
           onChangeEnd: (val) async => await _settingsConverter.saveItem(
               WATER_MAX_PH,
               val), //TODO add bounding between min-max sliders - states
         ),
-        SettingsScreen.SliderSettingsTile(
+        settings_screen.SliderSettingsTile(
           min: 0,
           max: 14,
           step: 0.1,
           defaultValue: 7,
-          title: "Min PH",
+          title: 'Min PH',
           settingKey: widget.deviceId + WATER_MIN_PH,
           onChangeEnd: (val) async =>
               await _settingsConverter.saveItem(WATER_MIN_PH, val),
@@ -269,48 +284,48 @@ class _DeviceSettingsSubpageState extends State<DeviceSettingsSubpage> {
     );
   }
 
-  validateMaxWaterLevel(String height) {
-    if (int.tryParse(height) == null) return "Input must be number";
-    int max = int.parse(height);
-    String min = SettingsScreen.Settings.getValue(
+  String validateMaxWaterLevel(String height) {
+    if (int.tryParse(height) == null) return 'Input must be number';
+    var max = int.parse(height);
+    var min = settings_screen.Settings.getValue(
         widget.deviceId + WATER_LEVEL_MIN_HEIGHT, height);
     if (min == null || min.isEmpty) return null;
     if (int.parse(min) > max) {
-      return "Maximum < minimum ($min)";
+      return 'Maximum < minimum ($min)';
     }
-    String sensorHeight = SettingsScreen.Settings.getValue(
+    var sensorHeight = settings_screen.Settings.getValue(
         widget.deviceId + WATER_LEVEL_SENSOR_HEIGHT, height);
     if (int.parse(sensorHeight) < max) {
-      return "Maximum > Height ($height)";
+      return 'Maximum > Height ($height)';
     }
     return null;
   }
 
-  validateMinWaterLevel(String height) {
-    if (int.tryParse(height) == null) return "Input must be number";
-    int min = int.parse(height);
-    String max = SettingsScreen.Settings.getValue(
+  String validateMinWaterLevel(String height) {
+    if (int.tryParse(height) == null) return 'Input must be number';
+    var min = int.parse(height);
+    var max = settings_screen.Settings.getValue(
         widget.deviceId + WATER_LEVEL_MAX_HEIGHT, height);
     if (max == null || max.isEmpty) return null;
     if (int.parse(max) < min) {
-      return "Minimum > maximum ($max)";
+      return 'Minimum > maximum ($max)';
     }
     return null;
   }
 
-  _createOutletsGroup() {
+  settings_screen.SettingsGroup _createOutletsGroup() {
     // print("_createOutletsGroup");
-    return SettingsScreen.SettingsGroup(
+    return settings_screen.SettingsGroup(
       title: 'Power outlets',
       children: [
-        SettingsScreen.SwitchSettingsTile(
+        settings_screen.SwitchSettingsTile(
           settingKey: widget.deviceId + POWER_OUTLET_ONE_ON,
           title: 'Outlet one:',
           onChange: (value) async {
             await _settingsConverter.saveItem(POWER_OUTLET_ONE_ON, value);
           },
         ),
-        SettingsScreen.ExpandableSettingsTile(
+        settings_screen.ExpandableSettingsTile(
           title: 'Power outlet 1 triggers',
           children: [
             OutletTriggerList(
@@ -330,14 +345,14 @@ class _DeviceSettingsSubpageState extends State<DeviceSettingsSubpage> {
             )
           ],
         ),
-        SettingsScreen.SwitchSettingsTile(
+        settings_screen.SwitchSettingsTile(
           settingKey: widget.deviceId + POWER_OUTLET_TWO_ON,
           title: 'Outlet two',
           onChange: (value) async {
             await _settingsConverter.saveItem(POWER_OUTLET_TWO_ON, value);
           },
         ),
-        SettingsScreen.ExpandableSettingsTile(
+        settings_screen.ExpandableSettingsTile(
           title: 'Power outlet 2 triggers',
           children: [
             OutletTriggerList(
@@ -361,29 +376,51 @@ class _DeviceSettingsSubpageState extends State<DeviceSettingsSubpage> {
     );
   }
 
-  StreamBuilder<BluetoothDevice> _createDirectSaveButton() {
+  StreamBuilder<BluetoothDeviceState> _createDirectSaveButton() {
     return StreamBuilder(
-      stream: widget.bluetoothHandler.device(),
+      stream: widget.bluetoothProvider.deviceStateStream,
       builder: (context, snapshot) {
-        //  print("subpage settings - create save button");
-        // print(snapshot.data);
-        // print(widget.bluetoothHandler.bluetoothDevice);
-        if (!snapshot.hasData &&
-            widget.bluetoothHandler.bluetoothDevice == null) {
+        if (!snapshot.hasData ||
+            snapshot.data == BluetoothDeviceState.connected) {
           return SizedBox.shrink();
+        } else {
+          return RaisedButton(
+              child: Text('Save settings directly'),
+              onPressed: () async => sendingToBluetooth
+                  ? null
+                  : {
+                      sendingToBluetooth = true,
+                      await widget.bluetoothProvider
+                          .writeByteArrayToBluetoothCharacteristic(
+                              _settingsConverter.settingsToByteArray()),
+                      sendingToBluetooth = false
+                    });
         }
-
-        return RaisedButton(
-            child: Text("Save settings directly"),
-            onPressed: () async => sendingToBluetooth
-                ? null
-                : {
-                    sendingToBluetooth = true,
-                    await widget.bluetoothHandler.saveToDeviceDirectly(
-                        _settingsConverter.settingsToByteArray()),
-                    sendingToBluetooth = false
-                  });
       },
     );
+
+//    return StreamBuilder(
+//      stream: widget.bluetoothProvider.device(),
+//      builder: (context, snapshot) {
+//        //  print("subpage settings - create save button");
+//        // print(snapshot.data);
+//        // print(widget.bluetoothHandler.bluetoothDevice);
+//        if (!snapshot.hasData &&
+//            widget.bluetoothProvider.bluetoothDevice == null) {
+//          return SizedBox.shrink();
+//        }
+//
+//        return RaisedButton(
+//            child: Text("Save settings directly"),
+//            onPressed: () async => sendingToBluetooth
+//                ? null
+//                : {
+//                    sendingToBluetooth = true,
+//                    await widget.bluetoothProvider.saveToDeviceDirectly(
+//                        _settingsConverter.settingsToByteArray()),
+//                    sendingToBluetooth = false
+//                  });
+//      },
+//    );
   }
 }

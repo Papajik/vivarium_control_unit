@@ -32,12 +32,12 @@ class _LedTriggerDialogState extends State<LedTriggerDialog> {
 
   @override
   void initState() {
-    print("ledTriggerDialog - init");
+    print('ledTriggerDialog - init');
     if (widget.trigger != null) {
       _selectedTime = widget.trigger.time;
       _selectedColor = Color(widget.trigger.color);
     } else {
-      print("new trigger");
+      print('new trigger');
       _selectedTime = 0;
       _selectedColor = Color(4283510184);
     }
@@ -55,11 +55,11 @@ class _LedTriggerDialogState extends State<LedTriggerDialog> {
         });
       },
       onSaved: () async {
-        print("saving trigger");
-        print("selectedTime = $_selectedTime");
-        print("selectedColor = $_selectedColor");
+        print('saving trigger');
+        print('selectedTime = $_selectedTime');
+        print('selectedColor = $_selectedColor');
         if (widget.trigger == null) {
-          LedTrigger t =
+          var t =
               LedTrigger(time: _selectedTime, color: _selectedColor.value);
           await Hive.box<LedTrigger>(HiveBoxes.ledTriggerList + widget.deviceId)
               .add(t);

@@ -28,7 +28,7 @@ class _LedTriggerTileState extends State<LedTriggerTile> {
 
   @override
   Widget build(BuildContext context) {
-    print("ledTriggerTile build = ${widget.trigger}");
+    print('ledTriggerTile build = ${widget.trigger}');
     return Container(
         height: 80,
         child: Row(
@@ -42,14 +42,14 @@ class _LedTriggerTileState extends State<LedTriggerTile> {
               child: DateTimePicker(
                   type: DateTimePickerType.time,
                   initialValue: getTimeStringFromTime(widget.trigger.time),
-                  timeLabelText: "Time",
+                  timeLabelText: 'Time',
                   onChanged: (val) => {
                         widget.trigger.time = getTimeFromString(val),
                         widget.onChanged(widget.trigger)
                       },
                   icon: Icon(Icons.access_time)),
             ),
-            ledOn() ? Text("Turn on") : Text("Turn off"),
+            ledOn() ? Text('Turn on') : Text('Turn off'),
             Switch(
               value: widget.trigger.color != 0,
               onChanged: (val) async {
@@ -106,12 +106,12 @@ class _LedTriggerTileState extends State<LedTriggerTile> {
   }
 
   void handleClick(String value, BuildContext context) async {
-    print("handle click");
+    print('handle click');
     print(value);
     switch (value) {
       case 'Delete':
         await widget.trigger.delete();
-        print("delete");
+        print('delete');
         widget.onChanged(null);
         break;
     }

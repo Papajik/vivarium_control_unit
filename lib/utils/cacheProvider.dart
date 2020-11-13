@@ -1,4 +1,3 @@
-import 'dart:io';
 
 import 'package:flutter_settings_screens/flutter_settings_screens.dart';
 import 'package:hive/hive.dart';
@@ -14,7 +13,7 @@ class HiveCache extends CacheProvider {
 
   @override
   Future<void> init() async {
-    Directory dir = await getApplicationDocumentsDirectory();
+    var dir = await getApplicationDocumentsDirectory();
 
     Hive
       ..init(dir.path)
@@ -25,6 +24,7 @@ class HiveCache extends CacheProvider {
       ..registerAdapter(OutletTriggerAdapter());
 
     _preferences = await Hive.openBox(HiveBoxes.mainBox);
+
   }
 
   @override
@@ -103,4 +103,5 @@ class HiveCache extends CacheProvider {
   Future<void> setString(String key, String value) {
     return _preferences.put(key, value);
   }
+
 }

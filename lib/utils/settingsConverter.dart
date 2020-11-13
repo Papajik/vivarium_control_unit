@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:typed_data';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter/material.dart';
 import 'package:hive/hive.dart';
 import 'package:vivarium_control_unit/models/feedTrigger.dart';
 import 'package:vivarium_control_unit/models/ledTrigger.dart';
@@ -11,21 +12,21 @@ import 'package:vivarium_control_unit/models/waterHeaterType.dart';
 import 'package:vivarium_control_unit/utils/byteArrayBuilder.dart';
 import 'package:vivarium_control_unit/utils/hiveBoxes.dart';
 
-const String WATER_LEVEL_SENSOR_HEIGHT = "settings.waterSensorHeight";
-const String WATER_LEVEL_MAX_HEIGHT = "settings.maxWaterHeight";
-const String WATER_LEVEL_MIN_HEIGHT = "settings.minWaterHeight";
-const String FEED_TRIGGERS = "settings.feedTriggers";
-const String LED_TRIGGERS = "settings.ledTriggers";
-const String LED_COLOR = "settings.ledColor";
-const String LED_ON = "settings.ledOn";
-const String WATER_OPTIMAL_TEMPERATURE = "settings.waterOptimalTemperature";
-const String WATER_HEATER_TYPE = "settings.waterHeaterType";
-const String WATER_MAX_PH = "settings.waterMaxPh";
-const String WATER_MIN_PH = "settings.waterMinPh";
-const String POWER_OUTLET_ONE_ON = "settings.powerOutletOneIsOn";
-const String POWER_OUTLET_ONE_TRIGGERS = "settings.powerOutletOneTriggers";
-const String POWER_OUTLET_TWO_TRIGGERS = "settings.powerOutletTwoTriggers";
-const String POWER_OUTLET_TWO_ON = "settings.powerOutletTwoIsOn";
+const String WATER_LEVEL_SENSOR_HEIGHT = 'settings.waterSensorHeight';
+const String WATER_LEVEL_MAX_HEIGHT = 'settings.maxWaterHeight';
+const String WATER_LEVEL_MIN_HEIGHT = 'settings.minWaterHeight';
+const String FEED_TRIGGERS = 'settings.feedTriggers';
+const String LED_TRIGGERS = 'settings.ledTriggers';
+const String LED_COLOR = 'settings.ledColor';
+const String LED_ON = 'settings.ledOn';
+const String WATER_OPTIMAL_TEMPERATURE = 'settings.waterOptimalTemperature';
+const String WATER_HEATER_TYPE = 'settings.waterHeaterType';
+const String WATER_MAX_PH = 'settings.waterMaxPh';
+const String WATER_MIN_PH = 'settings.waterMinPh';
+const String POWER_OUTLET_ONE_ON = 'settings.powerOutletOneIsOn';
+const String POWER_OUTLET_ONE_TRIGGERS = 'settings.powerOutletOneTriggers';
+const String POWER_OUTLET_TWO_TRIGGERS = 'settings.powerOutletTwoTriggers';
+const String POWER_OUTLET_TWO_ON = 'settings.powerOutletTwoIsOn';
 
 class SettingsConverter {
   final String deviceId;
@@ -37,33 +38,61 @@ class SettingsConverter {
   Box<OutletTrigger> outletOneTriggersBox;
   Box<OutletTrigger> outletTwoTriggersBox;
 
-  SettingsConverter({this.deviceId, this.userId}) {
-    print("SettingsConverter - constructor");
+  bool _initialized;
+
+  bool get initialized => _initialized;
+  set initialized(bool b) {
+    _initialized =b;
+    _initializedStream.add(b);
+  }
+
+  final StreamController<bool> _initializedStream =
+  StreamController<bool>.broadcast();
+
+  Stream<bool> get initializedStream => _initializedStream.stream;
+
+
+
+
+  SettingsConverter({@required this.deviceId, @required this.userId}) {
+    print('SettingsConverter - constructor');
+    _initHive();
+    initialized = false;
+  }
+
+  Future<void> _initHive() async {
+    print('INIT - feedTriggersBox');
     feedTriggersBox =
-        Hive.box<FeedTrigger>(HiveBoxes.feedTriggerList + deviceId);
-    ledTriggersBox = Hive.box<LedTrigger>(HiveBoxes.ledTriggerList + deviceId);
-    outletOneTriggersBox =
-        Hive.box<OutletTrigger>(HiveBoxes.outletOneTriggerList + deviceId);
-    outletTwoTriggersBox =
-        Hive.box<OutletTrigger>(HiveBoxes.outletTwoTriggerList + deviceId);
+        await Hive.openBox<FeedTrigger>(HiveBoxes.feedTriggerList + deviceId);
+    print('INIT - ledTriggersBox');
+    ledTriggersBox =
+        await Hive.openBox<LedTrigger>(HiveBoxes.ledTriggerList + deviceId);
+    print('INIT - outletOneTriggersBox');
+    outletOneTriggersBox = await Hive.openBox<OutletTrigger>(
+        HiveBoxes.outletOneTriggerList + deviceId);
+    print('INIT - outletTwoTriggersBox');
+    outletTwoTriggersBox = await Hive.openBox<OutletTrigger>(
+        HiveBoxes.outletTwoTriggerList + deviceId);
+    print('INIT - done');
+    initialized = true;
   }
 
   Future<bool> loadSettingsFromCloud() async {
-    print("Loading from cloud");
+    print('Loading from cloud');
     var docRef = FirebaseFirestore.instance
-        .collection("users")
+        .collection('users')
         .doc(userId)
-        .collection("devices")
+        .collection('devices')
         .doc(deviceId);
     var data = await docRef.get();
-    var settings = data.data()["settings"];
-//      print(settings);
+    var settings = data.data()['settings'];
+
     settingsObject =
         SettingsObject.fromJson(Map<String, dynamic>.from(settings));
-     print("object created");
+    print('object created');
 //     print(settingsObject.ledTriggers);
     await updateCache();
-     print("cache updated");
+    print('cache updated');
     return true;
   }
 
@@ -87,46 +116,44 @@ class SettingsConverter {
     );
   }
 
-  updateCache() async {
-    // print("settings converter - update cache");
-//    print("update cache");
-    await updateFeedTriggers();
-//    print("updateFeedTriggers updated");
-    await updateLedTriggers();
-//    print("updateLedTriggers updated");
-    await updateOutletOneTriggers();
-    await updateOutletTwoTriggers();
+  Future<void> updateCache() async {
+     print('settings converter - update cache');
+     print('_updateFeedTriggers');
+    await _updateFeedTriggers();
+     print('_updateLedTriggers');
+    await _updateLedTriggers();
+     print('_updateOutletOneTriggers');
+    await _updateOutletOneTriggers();
+     print('_updateOutletTwoTriggers');
+    await _updateOutletTwoTriggers();
+     print('updateMainBox');
     await updateMainBox();
-//    print("updateMainBox updated");
+    print('...');
     return;
   }
 
-  updateLedTriggers() async {
+  Future<void> _updateLedTriggers() async {
     await ledTriggersBox.clear();
     await ledTriggersBox.addAll(settingsObject.ledTriggers);
-    return true;
   }
-  updateOutletOneTriggers() async {
-    print("updateOutletOneTriggers");
+
+  Future<void> _updateOutletOneTriggers() async {
+    print('updateOutletOneTriggers');
     await outletOneTriggersBox.clear();
     await outletOneTriggersBox.addAll(settingsObject.powerOutletOneTriggers);
-    return true;
   }
-  updateOutletTwoTriggers() async {
+
+  Future<void> _updateOutletTwoTriggers() async {
     await outletTwoTriggersBox.clear();
     await outletTwoTriggersBox.addAll(settingsObject.powerOutletTwoTriggers);
-    return true;
   }
 
-  updateFeedTriggers() async {
-//    print("Update feed triggers inside");
-//    print(feedTriggersBox.values);
+  Future<void> _updateFeedTriggers() async {
     await feedTriggersBox.clear();
     await feedTriggersBox.addAll(settingsObject.feedTriggers);
-    return true;
   }
 
-  updateMainBox() async {
+  Future<void> updateMainBox() async {
     //print("updateMainBox");
     //print("heatertype = ${settingsObject.waterHeaterType.text}");
     await mainBox.clear();
@@ -151,8 +178,6 @@ class SettingsConverter {
 
     //  print("after:");
     //  print(mainBox.values);
-
-    return true;
   }
 
   List<FeedTrigger> getFeedTriggers() {
@@ -171,13 +196,13 @@ class SettingsConverter {
     return outletTwoTriggersBox.values.toList();
   }
 
-  saveItem(String key, dynamic value) async {
+  Future<void> saveItem(String key, dynamic value) async {
     await saveItemToCloud(key, value);
     await saveToCache(deviceId + key, value);
   }
 
-  saveToCache(String key, dynamic value) async {
-    print("Saving $key = $value");
+  Future<void> saveToCache(String key, dynamic value) async {
+    print('Saving $key = $value');
     await mainBox.put(key, value);
     print(mainBox.toMap());
   }
@@ -200,8 +225,8 @@ class SettingsConverter {
   Uint8List settingsToByteArray() {
     //  print(settingsObject.toJson());
     //  print(settingsObject.feedTriggers.first.dateTime.millisecondsSinceEpoch);
-    SettingsObject settingsObject = getSettingsObjectFromCache();
-    ByteArrayBuilder converter = ByteArrayBuilder();
+    var settingsObject = getSettingsObjectFromCache();
+    var converter = ByteArrayBuilder();
 
     converter.setSizeOfObject(settingsObject.toJson());
     converter.addData(settingsObject.ledColor);
@@ -220,7 +245,7 @@ class SettingsConverter {
     print(settingsObject.feedTriggers);
     // converter.addData(settingsObject.ledTriggers);
 
-    Uint8List l = converter.getDataList();
+    var l = converter.getDataList();
     print(l);
     return l;
   }

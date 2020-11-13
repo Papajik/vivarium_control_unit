@@ -27,7 +27,7 @@ class _OutletTriggerTileState extends State<OutletTriggerTile> {
             child: DateTimePicker(
                 type: DateTimePickerType.time,
                 initialValue: getTimeStringFromTime(widget.trigger.time),
-                timeLabelText: "Time",
+                timeLabelText: 'Time',
                 onChanged: (val) => {
                       widget.trigger.time = getTimeFromString(val),
                       widget.onChanged(widget.trigger)
@@ -41,7 +41,7 @@ class _OutletTriggerTileState extends State<OutletTriggerTile> {
               widget.onChanged(widget.trigger);
             },
           ),
-          Text(widget.trigger.outletOn ? "Turn on" : "Turn off"),
+          Text(widget.trigger.outletOn ? 'Turn on' : 'Turn off'),
           PopupMenuButton(onSelected: (val) {
             handleClick(val, context);
           }, itemBuilder: (BuildContext context) {
@@ -58,12 +58,12 @@ class _OutletTriggerTileState extends State<OutletTriggerTile> {
   }
 
   void handleClick(String value, BuildContext context) async {
-    print("handle click");
+    print('handle click');
     print(value);
     switch (value) {
       case 'Delete':
         await widget.trigger.delete();
-        print("delete");
+        print('delete');
         widget.onChanged(null);
         break;
     }
