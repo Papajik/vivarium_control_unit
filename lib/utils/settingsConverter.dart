@@ -1,15 +1,18 @@
 import 'dart:async';
+import 'dart:io';
 import 'dart:typed_data';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 import 'package:hive/hive.dart';
-import 'package:vivarium_control_unit/models/feedTrigger.dart';
-import 'package:vivarium_control_unit/models/ledTrigger.dart';
-import 'package:vivarium_control_unit/models/outletTrigger.dart';
-import 'package:vivarium_control_unit/models/settingsObject.dart';
-import 'package:vivarium_control_unit/models/waterHeaterType.dart';
+import 'package:vivarium_control_unit/models/device/deviceSettings.dart';
+import 'package:vivarium_control_unit/models/device/triggers/feedTrigger.dart';
+import 'package:vivarium_control_unit/models/device/triggers/ledTrigger.dart';
+import 'package:vivarium_control_unit/models/device/triggers/outletTrigger.dart';
+import 'package:vivarium_control_unit/models/device/triggers/waterHeaterType.dart';
 import 'package:vivarium_control_unit/utils/byteArrayBuilder.dart';
+import 'package:vivarium_control_unit/utils/firebaseProvider.dart';
 import 'package:vivarium_control_unit/utils/hiveBoxes.dart';
 
 const String WATER_LEVEL_SENSOR_HEIGHT = 'settings.waterSensorHeight';
@@ -28,11 +31,11 @@ const String POWER_OUTLET_ONE_TRIGGERS = 'settings.powerOutletOneTriggers';
 const String POWER_OUTLET_TWO_TRIGGERS = 'settings.powerOutletTwoTriggers';
 const String POWER_OUTLET_TWO_ON = 'settings.powerOutletTwoIsOn';
 
+
 class SettingsConverter {
   final String deviceId;
   final String userId;
-  SettingsObject settingsObject;
-  Box mainBox = Hive.box(HiveBoxes.mainBox);
+  Box mainBox;
   Box<FeedTrigger> feedTriggersBox;
   Box<LedTrigger> ledTriggersBox;
   Box<OutletTrigger> outletOneTriggersBox;
@@ -41,8 +44,9 @@ class SettingsConverter {
   bool _initialized;
 
   bool get initialized => _initialized;
+
   set initialized(bool b) {
-    _initialized =b;
+    _initialized = b;
     _initializedStream.add(b);
   }
 
@@ -52,108 +56,111 @@ class SettingsConverter {
   Stream<bool> get initializedStream => _initializedStream.stream;
 
 
-
-
   SettingsConverter({@required this.deviceId, @required this.userId}) {
     print('SettingsConverter - constructor');
-    _initHive();
-    initialized = false;
+    if (!kIsWeb && (Platform.isAndroid || Platform.isIOS)) {
+      initialized = false;
+      print('Initializing settings converter');
+      _initHive();
+    } else{
+      initialized = true;
+    }
   }
 
   Future<void> _initHive() async {
-    print('INIT - feedTriggersBox');
-    feedTriggersBox =
+        mainBox = Hive.box(HiveBoxes.mainBox);
+
+        print('INIT - feedTriggersBox');
+        feedTriggersBox =
         await Hive.openBox<FeedTrigger>(HiveBoxes.feedTriggerList + deviceId);
-    print('INIT - ledTriggersBox');
-    ledTriggersBox =
+        print('INIT - ledTriggersBox');
+        ledTriggersBox =
         await Hive.openBox<LedTrigger>(HiveBoxes.ledTriggerList + deviceId);
-    print('INIT - outletOneTriggersBox');
-    outletOneTriggersBox = await Hive.openBox<OutletTrigger>(
-        HiveBoxes.outletOneTriggerList + deviceId);
-    print('INIT - outletTwoTriggersBox');
-    outletTwoTriggersBox = await Hive.openBox<OutletTrigger>(
-        HiveBoxes.outletTwoTriggerList + deviceId);
-    print('INIT - done');
-    initialized = true;
+        print('INIT - outletOneTriggersBox');
+        outletOneTriggersBox = await Hive.openBox<OutletTrigger>(
+            HiveBoxes.outletOneTriggerList + deviceId);
+        print('INIT - outletTwoTriggersBox');
+        outletTwoTriggersBox = await Hive.openBox<OutletTrigger>(
+            HiveBoxes.outletTwoTriggerList + deviceId);
+        print('INIT - done');
+
+        //After initializing box is done, stream is notified with new value
+        initialized = true;
+
   }
 
   Future<bool> loadSettingsFromCloud() async {
     print('Loading from cloud');
-    var docRef = FirebaseFirestore.instance
-        .collection('users')
-        .doc(userId)
-        .collection('devices')
-        .doc(deviceId);
-    var data = await docRef.get();
+    //TODO
+    var data = await getDevice(deviceId);
     var settings = data.data()['settings'];
 
-    settingsObject =
-        SettingsObject.fromJson(Map<String, dynamic>.from(settings));
+
     print('object created');
 //     print(settingsObject.ledTriggers);
-    await updateCache();
+    await updateCache(DeviceSettings.fromJson(Map<String, dynamic>.from(settings)));
     print('cache updated');
     return true;
   }
 
-  SettingsObject getSettingsObjectFromCache() {
-    return SettingsObject(
+  DeviceSettings getSettingsObjectFromCache() {
+    return DeviceSettings(
       ledTriggers: ledTriggersBox.values.toList(),
       feedTriggers: feedTriggersBox.values.toList(),
       ledColor: mainBox.get(deviceId + LED_COLOR),
       ledOn: mainBox.get(deviceId + LED_ON),
       maxWaterHeight: mainBox.get(deviceId + WATER_LEVEL_MAX_HEIGHT),
       minWaterHeight: mainBox.get(deviceId + WATER_LEVEL_MIN_HEIGHT),
-      powerOutletOneIsOn: mainBox.get(deviceId + POWER_OUTLET_ONE_ON),
-      powerOutletTwoIsOn: mainBox.get(deviceId + POWER_OUTLET_TWO_ON),
+      powerOutletOneOn: mainBox.get(deviceId + POWER_OUTLET_ONE_ON),
+      powerOutletTwoOn: mainBox.get(deviceId + POWER_OUTLET_TWO_ON),
       waterHeaterType:
-          getHeaterTypeByName(mainBox.get(deviceId + WATER_HEATER_TYPE)),
+      getHeaterTypeByName(mainBox.get(deviceId + WATER_HEATER_TYPE)),
       waterMaxPh: mainBox.get(deviceId + WATER_MAX_PH),
       waterMinPh: mainBox.get(deviceId + WATER_MIN_PH),
       waterOptimalTemperature:
-          mainBox.get(deviceId + WATER_OPTIMAL_TEMPERATURE),
+      mainBox.get(deviceId + WATER_OPTIMAL_TEMPERATURE),
       waterSensorHeight: mainBox.get(deviceId + WATER_LEVEL_SENSOR_HEIGHT),
     );
   }
 
-  Future<void> updateCache() async {
-     print('settings converter - update cache');
-     print('_updateFeedTriggers');
-    await _updateFeedTriggers();
-     print('_updateLedTriggers');
-    await _updateLedTriggers();
-     print('_updateOutletOneTriggers');
-    await _updateOutletOneTriggers();
-     print('_updateOutletTwoTriggers');
-    await _updateOutletTwoTriggers();
-     print('updateMainBox');
-    await updateMainBox();
+  Future<void> updateCache(DeviceSettings settingsObject) async {
+    print('settings converter - update cache');
+    print('_updateFeedTriggers');
+    await _updateFeedTriggers(settingsObject);
+    print('_updateLedTriggers');
+    await _updateLedTriggers(settingsObject);
+    print('_updateOutletOneTriggers');
+    await _updateOutletOneTriggers(settingsObject);
+    print('_updateOutletTwoTriggers');
+    await _updateOutletTwoTriggers(settingsObject);
+    print('updateMainBox');
+    await updateMainBox(settingsObject);
     print('...');
     return;
   }
 
-  Future<void> _updateLedTriggers() async {
+  Future<void> _updateLedTriggers(DeviceSettings settingsObject) async {
     await ledTriggersBox.clear();
     await ledTriggersBox.addAll(settingsObject.ledTriggers);
   }
 
-  Future<void> _updateOutletOneTriggers() async {
+  Future<void> _updateOutletOneTriggers(DeviceSettings settingsObject) async {
     print('updateOutletOneTriggers');
     await outletOneTriggersBox.clear();
     await outletOneTriggersBox.addAll(settingsObject.powerOutletOneTriggers);
   }
 
-  Future<void> _updateOutletTwoTriggers() async {
+  Future<void> _updateOutletTwoTriggers(DeviceSettings settingsObject) async {
     await outletTwoTriggersBox.clear();
     await outletTwoTriggersBox.addAll(settingsObject.powerOutletTwoTriggers);
   }
 
-  Future<void> _updateFeedTriggers() async {
+  Future<void> _updateFeedTriggers(DeviceSettings settingsObject) async {
     await feedTriggersBox.clear();
     await feedTriggersBox.addAll(settingsObject.feedTriggers);
   }
 
-  Future<void> updateMainBox() async {
+  Future<void> updateMainBox(DeviceSettings settingsObject) async {
     //print("updateMainBox");
     //print("heatertype = ${settingsObject.waterHeaterType.text}");
     await mainBox.clear();
@@ -170,9 +177,9 @@ class SettingsConverter {
     await mainBox.put(deviceId + LED_ON, settingsObject.ledOn);
     await mainBox.put(deviceId + LED_COLOR, settingsObject.ledColor);
     await mainBox.put(
-        deviceId + POWER_OUTLET_ONE_ON, settingsObject.powerOutletOneIsOn);
+        deviceId + POWER_OUTLET_ONE_ON, settingsObject.powerOutletOneOn);
     await mainBox.put(
-        deviceId + POWER_OUTLET_TWO_ON, settingsObject.powerOutletTwoIsOn);
+        deviceId + POWER_OUTLET_TWO_ON, settingsObject.powerOutletTwoOn);
     await mainBox.put(deviceId + WATER_MAX_PH, settingsObject.waterMaxPh);
     await mainBox.put(deviceId + WATER_MIN_PH, settingsObject.waterMinPh);
 
@@ -186,8 +193,8 @@ class SettingsConverter {
 
   List<LedTrigger> getLedTriggers() {
     return ledTriggersBox.values.toList();
-  }
 
+  }
   List<OutletTrigger> getOutletOneTrigger() {
     return outletOneTriggersBox.values.toList();
   }
@@ -210,11 +217,15 @@ class SettingsConverter {
   Future<void> saveItemToCloud(String key, dynamic value) async {
     //TODO add logic on failed update
     print('save to cloud key = $key, value = $value');
+
+
     var docRef = FirebaseFirestore.instance
         .collection('users')
         .doc(userId)
         .collection('devices')
         .doc(deviceId);
+
+    print('Ref = $docRef');
     return docRef.update({key: value});
   }
 
@@ -233,8 +244,8 @@ class SettingsConverter {
     converter.addData(settingsObject.ledOn);
     converter.addData(settingsObject.maxWaterHeight);
     converter.addData(settingsObject.minWaterHeight);
-    converter.addData(settingsObject.powerOutletOneIsOn);
-    converter.addData(settingsObject.powerOutletTwoIsOn);
+    converter.addData(settingsObject.powerOutletOneOn);
+    converter.addData(settingsObject.powerOutletTwoOn);
     converter.addData(settingsObject.waterHeaterType);
     converter.addData(settingsObject.waterMaxPh);
     converter.addData(settingsObject.waterMinPh);
@@ -249,4 +260,6 @@ class SettingsConverter {
     print(l);
     return l;
   }
+
+
 }

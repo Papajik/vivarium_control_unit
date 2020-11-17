@@ -16,12 +16,14 @@ class LocationTile extends StatelessWidget {
     return ListTile(
       title: Text(location.name ?? 'Unknown location'),
       subtitle: Text(location.deviceCount.toString() + ' devices'),
-      trailing: Column(
-        children: <Widget>[
-          Text('Last update'),
-          Text(location.lastUpdate.toDate().toIso8601String()),
-          Text(location.id)
-        ],
+      trailing: Container(
+        child: Column(
+          children: <Widget>[
+            Text('Last update'),
+            Text(location.lastUpdate.toDate().toIso8601String()),
+           // Text(location.id)
+          ],
+        ),
       ),
       leading: Builder(
         builder: (context) {
