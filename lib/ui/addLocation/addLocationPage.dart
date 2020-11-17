@@ -5,29 +5,39 @@ import 'package:flutter_bluetooth_serial/flutter_bluetooth_serial.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:vivarium_control_unit/ui/addLocation/bluetoothDeviceList.dart';
 
-class AddLocation extends StatefulWidget {
+class AddLocationPage extends StatefulWidget {
   final bool isBluetoothOn;
   final bool isDiscovering;
 
-  const AddLocation(
+  const AddLocationPage(
       {Key key, this.isBluetoothOn = false, this.isDiscovering = false})
       : super(key: key);
 
   @override
-  _AddLocationState createState() => _AddLocationState();
+  _AddLocationPageState createState() => _AddLocationPageState();
 }
 
-class _AddLocationState extends State<AddLocation> {
+class _AddLocationPageState extends State<AddLocationPage> {
   StreamSubscription<BluetoothDiscoveryResult> _streamDiscoverySubscription;
+  List<BluetoothDiscoveryResult> results = <BluetoothDiscoveryResult>[];
+
+  BluetoothState _bluetoothState;
+
+  BluetoothState get bluetoothState => _bluetoothState;
   StreamSubscription<BluetoothState> _streamStateSubscription;
 
-  List<BluetoothDiscoveryResult> results = <BluetoothDiscoveryResult>[];
   bool isDiscovering;
   bool isBluetoothOn;
+
+  bool _isBluetoothOn(BluetoothState bluetoothState) {
+    return (bluetoothState == BluetoothState.STATE_ON ||
+        bluetoothState == BluetoothState.STATE_BLE_ON);
+  }
 
   @override
   void initState() {
     super.initState();
+
     isBluetoothOn = widget.isBluetoothOn;
     isDiscovering = widget.isDiscovering;
 
@@ -67,12 +77,17 @@ class _AddLocationState extends State<AddLocation> {
   }
 
   void _startDiscovery() {
+    print('_startDiscovery');
+
     _streamDiscoverySubscription =
         FlutterBluetoothSerial.instance.startDiscovery().listen((r) {
       setState(() {
+        print('Found: ' + r.toString());
         results.add(r);
       });
     });
+
+    print(_streamDiscoverySubscription.hashCode);
 
     _streamDiscoverySubscription.onDone(() {
       setState(() {
@@ -86,7 +101,7 @@ class _AddLocationState extends State<AddLocation> {
   }
 
   void _restartDiscovery() {
-    if (isBluetoothOn){
+    if (isBluetoothOn) {
       setState(() {
         results.clear();
         isDiscovering = true;
@@ -103,7 +118,6 @@ class _AddLocationState extends State<AddLocation> {
         actions: [buildToggleBluetoothButton()],
       ),
       body: _buildBody(),
-
     );
   }
 
@@ -111,10 +125,10 @@ class _AddLocationState extends State<AddLocation> {
     if (!isBluetoothOn) return Text('Bluetooth OFF');
     return RefreshIndicator(
         child: BluetoothDeviceList(
-      bluetoothDiscoveryResults: results,
-      isDiscovering: isDiscovering,
-    ),
-    onRefresh: () async => _restartDiscovery());
+          bluetoothDiscoveryResults: results,
+          isDiscovering: isDiscovering,
+        ),
+        onRefresh: () async => _restartDiscovery());
   }
 
   Widget buildToggleBluetoothButton() {
@@ -141,10 +155,7 @@ class _AddLocationState extends State<AddLocation> {
     }
   }
 
-  bool _isBluetoothOn(BluetoothState bluetoothState) {
-    return (bluetoothState == BluetoothState.STATE_ON ||
-        bluetoothState == BluetoothState.STATE_BLE_ON);
-  }
+
 
   @override
   void dispose() {

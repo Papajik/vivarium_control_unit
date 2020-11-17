@@ -22,7 +22,7 @@ const String claimFailed = 'failed';
 
 FlutterBlue flutterBlue = FlutterBlue.instance;
 
-enum ClaimingStep {
+enum ClaimStep {
   START,
   CONNECTING,
   CONNECTED,
@@ -36,26 +36,28 @@ enum ClaimingStep {
 
 class BluetoothProvider {
   String deviceIdBuffer = '';
-  ClaimingStep _claimingStep;
+  ClaimStep _claimStep;
 
-  ClaimingStep get claimingStep => _claimingStep;
+  /// Claim device or location
 
-  set claimingStep(ClaimingStep step) {
+  ClaimStep get claimingStep => _claimStep;
+
+  set claimingStep(ClaimStep step) {
     print('Claim step = $step');
     _claimingStepController.add(step);
-    _claimingStep = step;
+    _claimStep = step;
   }
 
-  final StreamController<ClaimingStep> _claimingStepController =
-  StreamController<ClaimingStep>.broadcast()..add(ClaimingStep.START);
+  final StreamController<ClaimStep> _claimingStepController =
+      StreamController<ClaimStep>.broadcast()..add(ClaimStep.START);
 
-  Stream<ClaimingStep> get claimingStepStream => _claimingStepController.stream;
+  Stream<ClaimStep> get claimingStepStream => _claimingStepController.stream;
 
   BluetoothDevice _device;
 
   String get deviceName => _device.name;
 
-  String get deviceMac =>_device.id.toString();
+  String get deviceMac => _device.id.toString();
 
   Stream<BluetoothDeviceState> get deviceStateStream => _device?.state;
 
@@ -67,7 +69,7 @@ class BluetoothProvider {
 
   BluetoothProvider({String name, String id}) {
     _device = setBluetoothDevice(name: name, id: id);
-    claimingStep = ClaimingStep.START;
+    claimingStep = ClaimStep.START;
   }
 
   ///[Name] = name of bluetooth device
@@ -84,11 +86,11 @@ class BluetoothProvider {
   ///
   /// Returns 'true' on successful connect and 'false' otherwise.
   Future<bool> connectBluetoothDevice() async {
-    claimingStep = ClaimingStep.CONNECTING;
+    claimingStep = ClaimStep.CONNECTING;
     print('BluetoothHandler Connect device');
     deviceIdBuffer = '';
     return _device.connect(timeout: Duration(seconds: 8)).then((_) {
-      claimingStep = ClaimingStep.CONNECTED;
+      claimingStep = ClaimStep.CONNECTED;
       return true;
     }).catchError((error, stacktrace) => false);
   }
@@ -96,7 +98,7 @@ class BluetoothProvider {
   Future<bool> disconnectBluetoothDevice() async {
     await _characteristicValueSubscription?.cancel();
     await _device?.disconnect();
-    claimingStep = ClaimingStep.START;
+    claimingStep = ClaimStep.START;
     return true;
   }
 
@@ -138,7 +140,6 @@ class BluetoothProvider {
     }
   }
 
-
   Future<bool> writeByteArrayToBluetoothCharacteristic(Uint8List s) async {
     try {
       await _characteristic.write(s);
@@ -147,8 +148,6 @@ class BluetoothProvider {
       return false;
     }
   }
-
-
 
   /// Starts verification handshake with [device]
   ///
@@ -160,7 +159,7 @@ class BluetoothProvider {
   ///
   void startVerifyLocationJob() async {
     print('verifyLocation');
-    claimingStep = ClaimingStep.HANDSHAKE;
+    claimingStep = ClaimStep.HANDSHAKE;
 
     /// Send verification string to bluetooth. Connected device should
     /// read this string and make a proper response.
@@ -170,13 +169,13 @@ class BluetoothProvider {
     /// that selected device is not the one user is looking for.
     Future.delayed(
         Duration(seconds: 5),
-            () => {
-          if (claimingStep.index < ClaimingStep.DEVICE_UNKNOWN.index)
-            {
-              deviceIdBuffer = locationUnknown,
-              claimingStep = ClaimingStep.DEVICE_UNKNOWN,
-            }
-        });
+        () => {
+              if (claimingStep.index < ClaimStep.DEVICE_UNKNOWN.index)
+                {
+                  deviceIdBuffer = locationUnknown,
+                  claimingStep = ClaimStep.DEVICE_UNKNOWN,
+                }
+            });
   }
 
   void _parseUserId(String data) {
@@ -186,7 +185,7 @@ class BluetoothProvider {
     data.runes.forEach((rune) {
       var char = String.fromCharCode(rune);
       if (char == locationVerificationResponseSuffix) {
-        claimingStep = ClaimingStep.DEVICE_VERIFIED;
+        claimingStep = ClaimStep.DEVICE_VERIFIED;
       } else {
         deviceIdBuffer += char;
       }
@@ -198,10 +197,10 @@ class BluetoothProvider {
     _characteristicValueSubscription = _characteristic.value.listen((event) {
       var response = String.fromCharCodes(event);
       switch (claimingStep) {
-        case ClaimingStep.CLAIMING:
+        case ClaimStep.CLAIMING:
           _readClaimingResponse(response);
           break;
-        case ClaimingStep.HANDSHAKE:
+        case ClaimStep.HANDSHAKE:
           _parseUserId(response);
           break;
         default:
@@ -212,23 +211,26 @@ class BluetoothProvider {
   void _readClaimingResponse(String response) {
     print('claimDevice, gotResponse = $response');
     if (response.startsWith(claimResponse)) {
-      claimingStep = ClaimingStep.CLAIMED;
+      claimingStep = ClaimStep.CLAIMED;
     }
 
     if (response.startsWith(claimFailed)) {
-      claimingStep = ClaimingStep.CLAIM_FAILED;
+      claimingStep = ClaimStep.CLAIM_FAILED;
     }
   }
 
-  void sendDisconnectedMsg(){
+  void sendDisconnectedMsg() {
     writeStringToBluetoothCharacteristic(disconnectMsg);
   }
 
   void claimDevice(String name) {
-    claimingStep = ClaimingStep.CLAIMING;
+    claimingStep = ClaimStep.CLAIMING;
     writeStringToBluetoothCharacteristic(
         claimString + '' + name + '~' + userId);
   }
+
+  /// Discovery of devices
+
 
 
 

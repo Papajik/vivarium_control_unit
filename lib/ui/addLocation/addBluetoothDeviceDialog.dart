@@ -33,7 +33,7 @@ class _AddBluetoothDeviceDialogState extends State<AddBluetoothDeviceDialog> {
     _controller = TextEditingController()..text = widget.provider.deviceName;
 
     widget.provider.claimingStepStream.listen((event) {
-      if (event == ClaimingStep.CLAIMED) {
+      if (event == ClaimStep.CLAIMED) {
         sendClaimLocationQuery(
             locationId: widget.provider.deviceIdBuffer,
             name: _controller.text,
@@ -60,13 +60,13 @@ class _AddBluetoothDeviceDialogState extends State<AddBluetoothDeviceDialog> {
       content: SizedBox(
         width: 200,
         height: 100,
-        child: StreamBuilder<ClaimingStep>(
+        child: StreamBuilder<ClaimStep>(
           stream: widget.provider.claimingStepStream,
           builder: buildAlertBodyFromStream,
         ),
       ),
       actions: [
-        StreamBuilder<ClaimingStep>(
+        StreamBuilder<ClaimStep>(
           stream: widget.provider.claimingStepStream,
           builder: buildActionsFromStream,
         )
@@ -75,11 +75,11 @@ class _AddBluetoothDeviceDialogState extends State<AddBluetoothDeviceDialog> {
   }
 
   Widget buildActionsFromStream(
-      BuildContext context, AsyncSnapshot<ClaimingStep> snap) {
+      BuildContext context, AsyncSnapshot<ClaimStep> snap) {
     var widgets = <Widget>[];
     var step = snap.data;
 
-    if ((step?.index ?? 0) < ClaimingStep.CLAIMING.index) {
+    if ((step?.index ?? 0) < ClaimStep.CLAIMING.index) {
       widgets.add(buildAddLocationButton(context, step));
       widgets.add(RaisedButton(
         onPressed: () => Navigator.pop(context, 'canceled'),
@@ -91,11 +91,11 @@ class _AddBluetoothDeviceDialogState extends State<AddBluetoothDeviceDialog> {
     );
   }
 
-  Widget buildAddLocationButton(BuildContext context, ClaimingStep step) {
+  Widget buildAddLocationButton(BuildContext context, ClaimStep step) {
     return RaisedButton(
         child: Text('Add location'),
         onPressed:
-            (step == ClaimingStep.DEVICE_VERIFIED) ? _addLocation : null);
+            (step == ClaimStep.DEVICE_VERIFIED) ? _addLocation : null);
   }
 
   void _addLocation() {
@@ -103,10 +103,10 @@ class _AddBluetoothDeviceDialogState extends State<AddBluetoothDeviceDialog> {
         {claimTriggered = true, widget.provider.claimDevice(_controller.text)});
   }
 
-  ///Builds a body depending on [ClaimingStep]
+  ///Builds a body depending on [ClaimStep]
   Widget buildAlertBodyFromStream(
-      BuildContext context, AsyncSnapshot<ClaimingStep> snap) {
-    if (!snap.hasData || (snap.data.index < ClaimingStep.CONNECTED.index)) {
+      BuildContext context, AsyncSnapshot<ClaimStep> snap) {
+    if (!snap.hasData || (snap.data.index < ClaimStep.CONNECTED.index)) {
       return Column(
         children: [
           Center(child: CircularProgressIndicator()),
@@ -115,8 +115,8 @@ class _AddBluetoothDeviceDialogState extends State<AddBluetoothDeviceDialog> {
       );
     }
     switch (snap.data) {
-      case ClaimingStep.CONNECTED:
-      case ClaimingStep.HANDSHAKE:
+      case ClaimStep.CONNECTED:
+      case ClaimStep.HANDSHAKE:
         return Column(
           children: [
             Center(child: CircularProgressIndicator()),
@@ -124,13 +124,13 @@ class _AddBluetoothDeviceDialogState extends State<AddBluetoothDeviceDialog> {
           ],
         );
         break;
-      case ClaimingStep.DEVICE_UNKNOWN:
+      case ClaimStep.DEVICE_UNKNOWN:
         return SizedBox(
           height: 100,
           child: Text('Unknown device. Please select another device'),
         );
         break;
-      case ClaimingStep.DEVICE_VERIFIED:
+      case ClaimStep.DEVICE_VERIFIED:
         return SizedBox(
           height: 100,
           child: Column(
@@ -151,7 +151,7 @@ class _AddBluetoothDeviceDialogState extends State<AddBluetoothDeviceDialog> {
           ),
         );
         break;
-      case ClaimingStep.CLAIMING:
+      case ClaimStep.CLAIMING:
         return Column(
           children: [
             CircularProgressIndicator(),
@@ -159,7 +159,7 @@ class _AddBluetoothDeviceDialogState extends State<AddBluetoothDeviceDialog> {
           ],
         );
         break;
-      case ClaimingStep.CLAIMED:
+      case ClaimStep.CLAIMED:
         return Text('Device claimed, you may close this dialog');
         break;
       default:
