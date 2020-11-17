@@ -21,6 +21,25 @@ Stream<DocumentSnapshot> deviceStream(String deviceId) {
       .snapshots();
 }
 
+Future<DocumentSnapshot> getDevice(String deviceId) async {
+  var docRef = FirebaseFirestore.instance
+      .collection('users')
+      .doc(userId)
+      .collection('devices')
+      .doc(deviceId);
+  return docRef.get();
+}
+
+Stream<QuerySnapshot> devicesStream({String locationId}) {
+  var ref = FirebaseFirestore.instance
+      .collection('users')
+      .doc(userId)
+      .collection('devices');
+  return ref.snapshots();
+}
+
+
+
 Map<DateTime, double> getHistoryDoubleMap(List history, String sensorKey) {
   var map = <DateTime, double>{};
   for (var value in history) {
@@ -77,7 +96,8 @@ dynamic getNextTriggerValue(
   return firstTrigger[key];
 }
 
-void sendClaimLocationQuery({String locationId, String macAddress, String name}) {
+void sendClaimLocationQuery(
+    {String locationId, String macAddress, String name}) {
   locationId = locationId.replaceAll('\n', '');
   locationId = locationId.replaceAll('\r', '');
 

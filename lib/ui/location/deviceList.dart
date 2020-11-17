@@ -1,8 +1,8 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
-import 'package:vivarium_control_unit/models/device.dart';
+import 'package:vivarium_control_unit/models/device/device.dart';
 import 'package:vivarium_control_unit/ui/location/deviceTile.dart';
-import 'package:vivarium_control_unit/utils/auth.dart';
+import 'package:vivarium_control_unit/utils/firebaseProvider.dart';
 
 class DeviceList extends StatelessWidget {
   final String locationId;
@@ -12,13 +12,7 @@ class DeviceList extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return StreamBuilder<QuerySnapshot>(
-      stream: FirebaseFirestore.instance
-          .collection('users')
-          .doc(userId)
-          .collection('devices')
-          .where('info.location', isEqualTo: locationId)
-          .where('info.active', isEqualTo: true)
-          .snapshots(),
+      stream: devicesStream(locationId:locationId),
       builder: (context, snapshot) {
         if (snapshot.hasError) {
           return Text('Error: ${snapshot.error}');
@@ -26,10 +20,13 @@ class DeviceList extends StatelessWidget {
         if (!snapshot.hasData) {
           return Center(child: CircularProgressIndicator());
         }
+        if (snapshot.data == null || snapshot.data.docs == null){
+          return Text("Should'nt not see this");
+        }
         return ListView(
           children: snapshot.data.docs.map((document) {
             return DeviceTile(
-              device:Device.fromJSON(document.data()),
+              device:Device.fromJson(document.data()),
             );
           }).toList(),
         );
