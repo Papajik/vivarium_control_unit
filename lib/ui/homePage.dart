@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:permission_handler/permission_handler.dart';
 import 'package:toast/toast.dart';
 import 'package:vivarium_control_unit/Constants.dart';
-import 'package:vivarium_control_unit/ui/locations/LocationsPage.dart';
 import 'package:vivarium_control_unit/ui/SettingsPage.dart';
+import 'package:vivarium_control_unit/ui/locations/LocationsPage.dart';
 import 'package:vivarium_control_unit/utils/auth.dart';
 
 class HomePage extends StatefulWidget {
@@ -11,8 +13,39 @@ class HomePage extends StatefulWidget {
 }
 
 class _LoginPageState extends State<HomePage> {
+  PermissionStatus _status;
   bool _signed = false;
   String _userName = '';
+
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    _runFirst();
+  }
+
+  Future<void> _runFirst() async {
+    await Permission.locationWhenInUse.status
+        .then((value) => setState(() => _status = value));
+    await _requestPerms();
+  }
+
+  Future<void> _requestPerms() async {
+    var statuses = await [
+      Permission.locationWhenInUse,
+      Permission.locationAlways
+    ].request();
+    print('statuses');
+    print(statuses);
+
+    if (await Permission.locationWhenInUse.serviceStatus.isEnabled) {
+      setState(() {
+        _status = PermissionStatus.granted;
+      });
+    } else if (_status == PermissionStatus.permanentlyDenied || _status ==  PermissionStatus.denied) {
+      await SystemChannels.platform.invokeMethod('SystemNavigator.pop');
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -50,13 +83,14 @@ class _LoginPageState extends State<HomePage> {
           FlatButton.icon(
             icon: Padding(
               child: Image(
-                image:_signed
+                image: _signed
                     ? Image.network(imageUrl).image
                     : AssetImage('assets/google_logo.png'),
-                color:null,
+                color: null,
                 alignment: Alignment.center,
                 fit: BoxFit.scaleDown,
-              ),padding: EdgeInsets.all(10),
+              ),
+              padding: EdgeInsets.all(10),
             ),
             label:
                 Text(_signed ? _userName : Constants.of(context).notSignedText),
