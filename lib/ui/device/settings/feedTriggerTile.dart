@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:vivarium_control_unit/models/feedTrigger.dart';
+import 'package:vivarium_control_unit/models/device/triggers/feedTrigger.dart';
 import 'package:vivarium_control_unit/ui/device/settings/feedTriggerDialog.dart';
 import 'package:vivarium_control_unit/utils/converters.dart';
 

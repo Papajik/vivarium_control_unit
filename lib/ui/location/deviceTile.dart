@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:vivarium_control_unit/models/device.dart';
+import 'package:vivarium_control_unit/models/device/device.dart';
+import 'package:vivarium_control_unit/models/device/deviceInfo.dart';
 import 'package:vivarium_control_unit/ui/device/devicePage.dart';
 
 class DeviceTile extends StatelessWidget {
@@ -9,11 +10,12 @@ class DeviceTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    print('deviceTile build');
     return ListTile(
-        title: Text(device.name) ?? Text('Unknown device'),
+        title: Text(device.info.name) ?? Text('Unknown device'),
         subtitle: Builder (
           builder: (context){
-            switch (getTypeFromIndex(device.type)){
+            switch (device.info.type){
               case Type.AQUARIUM:
                 return Text('Aquarium');
               case Type.TERRARIUM:
@@ -26,12 +28,12 @@ class DeviceTile extends StatelessWidget {
         trailing: Column(
           children: <Widget>[
             Text('Last update'),
-            Text(device.sensorValues.updateTime.toDate().toIso8601String())
+            Text(device.sensorData.updateTime.toIso8601String())
           ],
         ),
         leading: Builder(
           builder: (context) {
-            switch (getConditionFromIndex(device.condition)) {
+            switch (device.info.condition) {
               case Condition.GREEN:
                 return Icon(Icons.check_circle_outline, color: Colors.green);
                 break;

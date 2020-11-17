@@ -1,6 +1,6 @@
 import 'dart:typed_data';
 
-import 'package:vivarium_control_unit/models/feedTrigger.dart';
+import 'package:vivarium_control_unit/models/device/triggers/feedTrigger.dart';
 
 class ByteArrayBuilder {
   int size;

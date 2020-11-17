@@ -15,7 +15,7 @@ class _LocationsPageState extends State<LocationsPage> {
     void _addLocation() {
       Navigator.of(context)
           .push(MaterialPageRoute<void>(builder: (BuildContext context) {
-        return AddLocation();
+        return AddLocationPage();
       }));
     }
 
