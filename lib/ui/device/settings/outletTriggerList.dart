@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:hive/hive.dart';
 import 'package:hive_flutter/hive_flutter.dart';
-import 'package:vivarium_control_unit/models/outletTrigger.dart';
+import 'package:vivarium_control_unit/models/device/triggers/outletTrigger.dart';
 import 'package:vivarium_control_unit/ui/device/settings/outletTriggerDialog.dart';
 import 'package:vivarium_control_unit/ui/device/settings/outletTriggerTile.dart';
 

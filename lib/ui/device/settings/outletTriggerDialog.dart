@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:hive/hive.dart';
-import 'package:vivarium_control_unit/models/outletTrigger.dart';
+import 'package:vivarium_control_unit/models/device/triggers/outletTrigger.dart';
 import 'package:vivarium_control_unit/ui/device/settings/triggerDialogContainer.dart';
 import 'package:vivarium_control_unit/utils/converters.dart';
 

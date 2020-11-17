@@ -1,6 +1,6 @@
 import 'package:date_time_picker/date_time_picker.dart';
 import 'package:flutter/material.dart';
-import 'package:vivarium_control_unit/models/outletTrigger.dart';
+import 'package:vivarium_control_unit/models/device/triggers/outletTrigger.dart';
 import 'package:vivarium_control_unit/utils/converters.dart';
 
 class OutletTriggerTile extends StatefulWidget {

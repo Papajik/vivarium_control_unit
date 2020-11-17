@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:hive/hive.dart';
-import 'package:vivarium_control_unit/models/ledTrigger.dart';
+import 'package:vivarium_control_unit/models/device/triggers/ledTrigger.dart';
 import 'package:vivarium_control_unit/ui/device/settings/ledColorDialog.dart';
 import 'package:vivarium_control_unit/ui/device/settings/triggerDialogContainer.dart';
 import 'package:vivarium_control_unit/utils/converters.dart';

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:vivarium_control_unit/utils/converters.dart';
 
 class OverviewCard extends StatelessWidget {
   final String title;
@@ -40,25 +41,32 @@ class OverviewCard extends StatelessWidget {
 class TriggerCardBody extends StatelessWidget {
 
   final Widget icon;
-  final String nextTriggerTime;
+  final int nextTriggerTime;
   final Widget nextChange;
 
+  /// Decide whether the next trigger exists.
+  ///
+  /// If this value is 'false' basic card will be drawn
+  final bool hasTrigger;
+
   const TriggerCardBody(
-      {Key key, this.icon, this.nextTriggerTime, this.nextChange})
+      {Key key, this.icon, this.nextTriggerTime, this.nextChange, this.hasTrigger = true})
       : super(key: key);
 
   @override
   Widget build(BuildContext context) {
     return CardBody(
       icon: icon,
-      children: [
-        Text('Next trigger: $nextTriggerTime'),
+      children: hasTrigger?[
+        Text('Next trigger: ${getTimeStringFromTime(nextTriggerTime)}'),
         SizedBox(
           height: 10,
         ),
         Row(
           children: [Text('Next change:'), nextChange],
         )
+      ]:[
+        Text('No triggers created')
       ],
     );
   }

@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_blue/flutter_blue.dart';
 import 'package:flutter_bluetooth_serial/flutter_bluetooth_serial.dart' as bs;
 import 'package:vivarium_control_unit/Constants.dart';
-import 'package:vivarium_control_unit/models/device.dart';
+import 'package:vivarium_control_unit/models/device/device.dart';
 import 'package:vivarium_control_unit/ui/device/camera/deviceViewSubpage.dart';
 import 'package:vivarium_control_unit/ui/device/overview/deviceOverviewSubpage.dart';
 import 'package:vivarium_control_unit/ui/device/settings/deviceSettingsSubpage.dart';
@@ -29,12 +29,15 @@ class _DevicePage extends State<DevicePage> {
   @override
   void initState() {
     super.initState();
+    print('devicePage initState');
     _bluetoothProvider = BluetoothProvider(
-        id: widget.device.macAddress, name: widget.device.name);
+        id: widget.device.info.macAddress, name: widget.device.info.name);
 
+    print('bluetooth done');
+    _settingsConverter =
+        SettingsConverter(userId: userId, deviceId: widget.device.info.id);
 
- _settingsConverter =
-        SettingsConverter(userId: userId, deviceId: widget.device.macAddress);
+    print('settings converter done');
 
     ///Whenever is bluetooth state changed, rebuild widget
     subscription = bs.FlutterBluetoothSerial.instance
@@ -42,6 +45,7 @@ class _DevicePage extends State<DevicePage> {
         .listen((bs.BluetoothState state) {
       setState(() {});
     });
+    print('devicePage initState end');
   }
 
   @override
@@ -53,11 +57,12 @@ class _DevicePage extends State<DevicePage> {
 
   @override
   Widget build(BuildContext context) {
+    print('devicePage build');
     return DefaultTabController(
         length: 3,
         child: Scaffold(
           appBar: AppBar(
-            title: Text(widget.device.name),
+            title: Text(widget.device.info.name),
             centerTitle: true,
             actions: <Widget>[_createConnectButtonFuture()],
             bottom: TabBar(
@@ -76,13 +81,12 @@ class _DevicePage extends State<DevicePage> {
           ),
           body: TabBarView(
             children: [
-              DeviceOverviewSubpage(userId: userId, deviceId: widget.device.id),
+              DeviceOverviewSubpage(device: widget.device),
               DeviceSettingsSubpage(
                   settingsConverter: _settingsConverter,
-                  userId: userId,
-                  deviceId: widget.device.id,
+                  device: widget.device,
                   bluetoothProvider: _bluetoothProvider),
-              DeviceViewSubpage(userId: userId, device: widget.device),
+              DeviceViewSubpage(camera: widget.device.camera),
             ],
           ),
         ));
@@ -115,29 +119,6 @@ class _DevicePage extends State<DevicePage> {
             icon: _icon(snapshot.data), onPressed: _onPressed(snapshot.data));
       },
     );
-
-//    return StreamBuilder(
-//      stream: _bluetoothHandler.device(),
-//      builder: (context, snapshot) {
-//        if (!snapshot.hasData) {
-//          return IconButton(
-//            icon: Icon(Icons.insert_link, color: Colors.white),
-//            onPressed: _bluetoothHandler.isConnecting()
-//                ? null
-//                : () async {
-//                    await _bluetoothHandler.connectDevice();
-//                  },
-//          );
-//        }
-//        return IconButton(
-//          icon: Icon(Icons.link_off, color: Colors.orange),
-//          onPressed: () async {
-//            await _bluetoothHandler.disconnectDevice();
-//            setState(() {});
-//          },
-//        );
-//      },
-//    );
   }
 
   Function _onPressed(BluetoothDeviceState state) {

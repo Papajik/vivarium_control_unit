@@ -2,7 +2,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:hive/hive.dart';
 import 'package:hive_flutter/hive_flutter.dart';
-import 'package:vivarium_control_unit/models/ledTrigger.dart';
+import 'package:vivarium_control_unit/models/device/triggers/ledTrigger.dart';
 import 'package:vivarium_control_unit/ui/device/settings/ledTriggerDialog.dart';
 import 'package:vivarium_control_unit/ui/device/settings/ledTriggerTile.dart';
 import 'package:vivarium_control_unit/utils/hiveBoxes.dart';
