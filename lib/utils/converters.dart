@@ -1,44 +1,43 @@
-import 'dart:typed_data';
 import 'dart:ui';
+
+int _offset = 0; // DateTime.now().timeZoneOffset.inHours;
+
 
 int getTimeFromString(String time) {
   var t = time.split(':');
   return getTime(int.parse(t[0]), int.parse(t[1]));
 }
 
-String getTimeStringFromTime(int time) {
+String getTimeStringFromTime(int? time) {
+  if (time == null) return '__:__';
   var lsHour = getHourFromTime(time).toString().padLeft(2, '0');
   var lsMinute = getMinuteFromTime(time).toString().padLeft(2, '0');
   return lsHour + ':' + lsMinute;
 }
 
 int getHourFromTime(int time) {
-  final list = Uint64List.fromList([time]);
-  final bytes = Uint8List.view(list.buffer);
-  return bytes.elementAt(1);
+  var h = time + _offset*256;
+  if (h == 24) h = 0;
+  return (h / 256).floor();
 }
 
 int getMinuteFromTime(int time) {
-  final list = Uint64List.fromList([time]);
-  final bytes = Uint8List.view(list.buffer);
-  return bytes.elementAt(0);
+  return time % 256;
 }
 
 int getTime(int hour, int minute) {
-  final hourList = Uint64List.fromList([hour]);
-  final hourBytes = Uint8List.view(hourList.buffer);
-  final minuteList = Uint64List.fromList([minute]);
-  final minuteBytes = Uint8List.view(minuteList.buffer);
-  final l =
-      Uint8List.fromList([0x00, 0x00, hourBytes.first, minuteBytes.first]);
-  return ByteData.sublistView(l).getInt32(0);
+  var h = hour - _offset;
+  if (h == -1) h = 23;
+  return h * 256 + minute;
 }
 
 int getIntFromColor(Color color) {
-  print(color);
-  print(color.value);
-  print(color.red);
-  print(color.green);
+  return ((color.red & 0xff) << 16) +
+      ((color.green & 0xff) << 8) +
+      ((color.blue & 0xff) << 0);
+}
 
-  return 1; //TODO upravit
+Color getColorFromInt(int i) {
+  return Color.fromARGB(255, (0x00ff0000 & i) >> 16, (0x0000ff00 & i) >> 8,
+      (0x000000ff & i) >> 0);
 }

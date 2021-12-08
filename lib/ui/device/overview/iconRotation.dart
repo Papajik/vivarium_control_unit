@@ -6,7 +6,7 @@ class IconRotation extends StatefulWidget {
   final double speed;
   final Widget icon;
 
-  const IconRotation({Key key,@required this.icon, this.speed =  0}) : super(key: key);
+  const IconRotation({Key? key,required this.icon, this.speed =  0}) : super(key: key);
 
   @override
   _IconRotationState createState() => _IconRotationState();
@@ -14,7 +14,7 @@ class IconRotation extends StatefulWidget {
 
 class _IconRotationState extends State<IconRotation>
     with SingleTickerProviderStateMixin {
-  AnimationController _animationController;
+  late AnimationController _animationController;
 
   @override
   void initState() {
@@ -26,7 +26,7 @@ class _IconRotationState extends State<IconRotation>
 
   @override
   Widget build(BuildContext context) {
-    return AnimatedBuilder(
+    return widget.speed == 0?widget.icon: AnimatedBuilder(
       animation: _animationController,
       builder: (context, child) => Transform.rotate(
         angle: _animationController.value * widget.speed,

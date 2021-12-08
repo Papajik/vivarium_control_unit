@@ -1,155 +1,165 @@
-import 'package:flutter/material.dart';
-import 'package:vivarium_control_unit/models/device/triggers/feedTrigger.dart';
-import 'package:vivarium_control_unit/models/device/triggers/ledTrigger.dart';
-import 'package:vivarium_control_unit/models/device/triggers/outletTrigger.dart';
-import 'package:vivarium_control_unit/models/device/triggers/waterHeaterType.dart';
-import 'package:vivarium_control_unit/utils/converters.dart';
+import 'package:vivarium_control_unit/models/device/generalSettings.dart';
+import 'package:vivarium_control_unit/models/device/modulePanelSettings.dart';
+import 'package:vivarium_control_unit/models/device/modules/dht/settings.dart';
+import 'package:vivarium_control_unit/models/device/modules/fan/settings.dart';
+import 'package:vivarium_control_unit/models/device/modules/feeder/settings.dart';
+import 'package:vivarium_control_unit/models/device/modules/heater/settings.dart';
+import 'package:vivarium_control_unit/models/device/modules/hum/settings.dart';
+import 'package:vivarium_control_unit/models/device/modules/keys.dart';
+import 'package:vivarium_control_unit/models/device/modules/led/settings.dart';
+import 'package:vivarium_control_unit/models/device/modules/modules.dart';
+import 'package:vivarium_control_unit/models/device/modules/ph/settings.dart';
+import 'package:vivarium_control_unit/models/device/modules/waterLevel/settings.dart';
+import 'package:vivarium_control_unit/models/device/modules/waterPump/settings.dart';
+
+import 'modules/waterTemp/settings.dart';
 
 class DeviceSettings {
-  ///water level
-
-  int waterSensorHeight;
-  int maxWaterHeight;
-  int minWaterHeight;
-
-  ///Lists
-
-  List<LedTrigger> ledTriggers;
-  List<FeedTrigger> feedTriggers;
-  List<OutletTrigger> powerOutletOneTriggers;
-  List<OutletTrigger> powerOutletTwoTriggers;
-
-  /// LED COLOR
-
-  int ledColor;
-  bool ledOn;
-
-  ///Water temperature
-
-  double waterOptimalTemperature;
-  HeaterType waterHeaterType;
-
-  ///PH
-  double waterMaxPh;
-  double waterMinPh;
-
-  ///Outlets
-  bool powerOutletOneOn;
-  bool powerOutletTwoOn;
+  final SettingsPh? ph;
+  final SettingsFeeder? feeder;
+  final SettingsFan? fan;
+  final SettingsLed? led;
+  final SettingsDht? dht;
+  final SettingsHeater? heater;
+  final SettingsHumidifier? humidifier;
+  final SettingsWaterLevel? waterLevel;
+  final SettingsWaterPump? pump;
+  final SettingsWaterTemp? waterTemp;
+  final GeneralSettings general;
+  final ModulePanelSettings? panel;
 
   DeviceSettings(
-      {this.feedTriggers,
-      this.ledTriggers,
-      this.powerOutletOneTriggers,
-      this.powerOutletTwoTriggers,
-      this.waterHeaterType,
-      this.ledColor,
-      this.ledOn,
-      this.maxWaterHeight,
-      this.minWaterHeight,
-      this.waterOptimalTemperature,
-      this.waterSensorHeight,
-      this.powerOutletOneOn,
-      this.powerOutletTwoOn,
-      this.waterMaxPh,
-      this.waterMinPh});
+      {this.ph,
+      this.feeder,
+      this.fan,
+      this.led,
+      this.dht,
+      this.heater,
+      this.waterLevel,
+      this.waterTemp,
+      this.pump,
+      this.humidifier,
+      this.panel,
+      required this.general});
 
-  DeviceSettings.fromJson(Map<String, dynamic> data)
-      : this(
-          ledTriggers: (data['ledTriggers'] as List)
-              .map((e) => LedTrigger.fromJson(e))
-              .toList(),
-          feedTriggers: (data['feedTriggers'] as List)
-              .map((e) => FeedTrigger.fromJson(e))
-              .toList(),
-          powerOutletOneTriggers: (data['powerOutletOneTriggers'] as List)
-              .map((e) => OutletTrigger.fromJson(e))
-              .toList(),
-          powerOutletTwoTriggers: (data['powerOutletTwoTriggers'] as List)
-              .map((e) => OutletTrigger.fromJson(e))
-              .toList(),
-          maxWaterHeight: data['maxWaterHeight'] as int,
-          minWaterHeight: data['minWaterHeight'] as int,
-          waterSensorHeight: data['waterSensorHeight'] as int,
-          waterHeaterType: HeaterType.values[(data['waterHeaterType'] as int)],
-          ledColor: data['ledColor'] as int,
-          ledOn: data['ledOn'] as bool,
-          waterOptimalTemperature: data['waterOptimalTemperature'] as double,
-          powerOutletOneOn: data['powerOutletOneOn'] as bool,
-          powerOutletTwoOn: data['powerOutletTwoOn'] as bool,
-          waterMaxPh: data['waterMaxPh'] as double,
-          waterMinPh: data['waterMinPh'] as double,
-        );
+  factory DeviceSettings.fromJson(Map data) {
+    return DeviceSettings(
+        general: GeneralSettings.fromJson(data[generalKey]),
+        ph: data[pHKey] == null ? null : SettingsPh.fromJson(data[pHKey]),
+        fan: data[fanKey] == null ? null : SettingsFan.fromJson(data[fanKey]),
+        dht: data[dhtKey] == null ? null : SettingsDht.fromJson(data[dhtKey]),
+        heater: data[heaterKey] == null
+            ? null
+            : SettingsHeater.fromJson(data[heaterKey]),
+        waterLevel: data[waterLevelKey] == null
+            ? null
+            : SettingsWaterLevel.fromJson(data[waterLevelKey]),
+        feeder: data[feederKey] == null
+            ? null
+            : SettingsFeeder.fromJson(data[feederKey]),
+        waterTemp: data[waterTempKey] == null
+            ? null
+            : SettingsWaterTemp.fromJson(data[waterTempKey]),
+        led: data[ledKey] == null ? null : SettingsLed.fromJson(data[ledKey]),
+        pump: data[pumpKey] == null
+            ? null
+            : SettingsWaterPump.fromJson(data[pumpKey]),
+        humidifier: data[humidifierKey] == null
+            ? null
+            : SettingsHumidifier.fromJson(data[humidifierKey]),
+        panel: data[panelKey] == null
+            ? null
+            : ModulePanelSettings.fromJson(data[panelKey]));
+  }
 
   Map<String, dynamic> toJson() => {
-        'ledOn': ledOn,
-        'ledColor': ledColor,
-        'maxWaterHeight': maxWaterHeight,
-        'minWaterHeight': minWaterHeight,
-        'powerOutletOneIsOn': powerOutletOneOn,
-        'powerOutletTwoIsOn': powerOutletTwoOn,
-        'waterHeaterType': waterHeaterType.index,
-        'waterMinPh': waterMinPh,
-        'waterMaxPh': waterMaxPh,
-        'waterOptimalTemperature': waterOptimalTemperature,
-        'waterSensorHeight': waterSensorHeight,
-        'feedTriggers': feedTriggers.map((e) => e.toJson()),
-        'ledTriggers': ledTriggers.map((e) => e.toJson()),
-        'powerOutletTwoTriggers': powerOutletTwoTriggers.map((e) => e.toJson()),
-        'powerOutletOneTriggers': powerOutletOneTriggers.map((e) => e.toJson()),
+        if (ph != null) '$generalKey': general.toJson(),
+        if (ph != null) '$pHKey': ph!.toJson(),
+        if (feeder != null) '$feederKey': feeder!.toJson(),
+        if (fan != null) '$fanKey': fan!.toJson(),
+        if (led != null) '$ledKey': led!.toJson(),
+        if (dht != null) '$dhtKey': dht!.toJson(),
+        if (heater != null) '$heaterKey': heater!.toJson(),
+        if (waterLevel != null) '$waterLevelKey': waterLevel!.toJson(),
+        if (waterTemp != null) '$waterTempKey': waterTemp!.toJson(),
+        if (pump != null) '$pumpKey': pump!.toJson(),
+        if (humidifier != null) '$humidifierKey': humidifier!.toJson(),
+        if (panel != null) '$panelKey': panel!.toJson()
       };
 
-  FeedTrigger get nextFeedTrigger {
-    var now = getTime(TimeOfDay.now().hour, TimeOfDay.now().minute);
-    feedTriggers.sort((a, b) => a.time.compareTo(b.time));
-    return feedTriggers.isEmpty
-        ? null
-        : feedTriggers.firstWhere((element) => element.time > now,
-        orElse: () => feedTriggers.first);
+  factory DeviceSettings.fromModules({required List<VivariumModule> modules}) =>
+      DeviceSettings(
+          general: GeneralSettings(trackAlive: true),
+          ph: modules.contains(VivariumModule.PH)
+              ? SettingsPh(
+                  minPh: 3, maxPh: 4, continuous: false, continuousDelay: 15)
+              : null,
+          feeder: modules.contains(VivariumModule.FEEDER)
+              ? SettingsFeeder(type: 0, triggers: {})
+              : null,
+          waterTemp: modules.contains(VivariumModule.WT)
+              ? SettingsWaterTemp(maxTemp: 20, minTemp: 10)
+              : null,
+          heater: modules.contains(VivariumModule.HEATER)
+              ? SettingsHeater(mode: 0, tuneMode: 0, directPower: 0)
+              : null,
+          fan: modules.contains(VivariumModule.FAN)
+              ? SettingsFan(maxAt: 25, startAt: 20)
+              : null,
+          dht: modules.contains(VivariumModule.DHT)
+              ? SettingsDht(maxTemp: 20, maxHum: 80, minHum: 60, minTemp: 15)
+              : null,
+          waterLevel: modules.contains(VivariumModule.WL)
+              ? SettingsWaterLevel(maxLevel: 40, minLevel: 35, sensorHeight: 60)
+              : null,
+          humidifier: modules.contains(VivariumModule.HUMIDIFIER)
+              ? SettingsHumidifier(goalHum: 70)
+              : null,
+          led: modules.contains(VivariumModule.LED)
+              ? SettingsLed(triggers: {})
+              : null,
+          pump: modules.contains(VivariumModule.PUMP)
+              ? SettingsWaterPump(goalLevel: 38)
+              : null,
+//          outlets: SettingsOutlet(outlet_1: false),
+          panel: ModulePanelSettings(brightness: 255));
+
+  @override
+  String toString() {
+    return '{ general: $general, ph: $ph, feeder: $feeder, fan: $fan, led: $led, dht: $dht, heater: $heater,'
+        ' humidifier: $humidifier, waterLevel: $waterLevel, pump: $pump, waterTemp: $waterTemp, panel: $panel }';
   }
 
-  FeedTrigger get lastFeedTrigger {
-    var now = getTime(TimeOfDay.now().hour, TimeOfDay.now().minute);
-    feedTriggers.sort((a, b) => a.time.compareTo(b.time));
-    return feedTriggers.isEmpty
-        ? null
-        : feedTriggers.lastWhere((element) => element.time < now,
-        orElse: () => feedTriggers.last);
-  }
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is DeviceSettings &&
+          runtimeType == other.runtimeType &&
+          ph == other.ph &&
+          feeder == other.feeder &&
+          fan == other.fan &&
+          led == other.led &&
+          dht == other.dht &&
+          heater == other.heater &&
+          humidifier == other.humidifier &&
+          waterLevel == other.waterLevel &&
+          pump == other.pump &&
+          waterTemp == other.waterTemp &&
+          panel == other.panel &&
+          general == other.general;
 
-  OutletTrigger get nextOutletOneTrigger {
-    var now = getTime(TimeOfDay.now().hour, TimeOfDay.now().minute);
-    powerOutletOneTriggers.sort((a, b) => a.time.compareTo(b.time));
-    return powerOutletOneTriggers.isEmpty
-        ? null
-        : powerOutletOneTriggers.firstWhere((element) => element.time > now,
-            orElse: () => powerOutletOneTriggers.first);
-  }
-
-  OutletTrigger get nextOutletTwoTrigger {
-    var now = getTime(TimeOfDay.now().hour, TimeOfDay.now().minute);
-    powerOutletTwoTriggers.sort((a, b) => a.time.compareTo(b.time));
-    return powerOutletOneTriggers.isEmpty
-        ? null
-        : powerOutletTwoTriggers.firstWhere((element) => element.time > now,
-        orElse: () => powerOutletTwoTriggers.elementAt(0));
-  }
-
-  LedTrigger get nextLedTrigger {
-    var now = getTime(TimeOfDay.now().hour, TimeOfDay.now().minute);
-    ledTriggers.sort((a, b) => a.time.compareTo(b.time));
-    return ledTriggers.isEmpty
-        ? null
-        : ledTriggers.firstWhere((element) => element.time > now,
-        orElse: () => ledTriggers.first);
-  }
-
-  LedTrigger get lastLedTrigger {
-    var now = getTime(TimeOfDay.now().hour, TimeOfDay.now().minute);
-    ledTriggers.sort((a, b) => a.time.compareTo(b.time));
-    return ledTriggers.isEmpty
-        ? null
-        : ledTriggers.lastWhere((element) => element.time < now,
-        orElse: () => ledTriggers.last);
-  }
+  @override
+  int get hashCode =>
+      ph.hashCode ^
+      feeder.hashCode ^
+      fan.hashCode ^
+      led.hashCode ^
+      dht.hashCode ^
+      heater.hashCode ^
+      humidifier.hashCode ^
+      waterLevel.hashCode ^
+      pump.hashCode ^
+      waterTemp.hashCode ^
+      panel.hashCode ^
+      general.hashCode;
 }
