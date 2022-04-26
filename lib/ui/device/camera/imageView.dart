@@ -28,42 +28,7 @@ class _ImageViewState extends State<ImageView> {
             setState(() => _fullscreen = true);
           }
         },
-        child: _fullscreen
-            ? Hero(
-                tag: 'imageHero',
-                child: Consumer<CameraImage?>(
-                  builder: (context, image, child) {
-                    return Image.memory(
-                      image!.data!,
-                      fit: BoxFit.contain,
-                      gaplessPlayback: true,
-                    );
-                  },
-                ))
-            : Hero(
-                tag: 'imageHero',
-                child: Consumer<CameraImage?>(
-                  builder: (context, image, child) {
-                    if (image == null) {
-                      return Center(child: CircularProgressIndicator());
-                    }
-                    if (image.data == null) {
-                      return Center(
-                          child: Card(
-                              child: Container(
-                                  height: 50,
-                                  width: 200,
-                                  child: Center(
-                                      child: Text('No photo available yet')))));
-                    }
-                    return Image.memory(
-                      image.data!,
-                      fit: BoxFit.contain,
-                      gaplessPlayback: true,
-                    );
-                  },
-                ),
-              ),
+        child: _fullscreen ? _fullscreenHero() : _basicHero(),
       ),
     );
   }
@@ -82,5 +47,51 @@ class _ImageViewState extends State<ImageView> {
   void dispose() {
     portrait();
     super.dispose();
+  }
+
+  Widget _fullscreenHero() {
+    return Hero(
+        tag: 'imageHero',
+        child: Consumer<CameraImage?>(
+          builder: (context, image, child) {
+            return Image.memory(
+              image!.data!,
+              fit: BoxFit.contain,
+              gaplessPlayback: true,
+            );
+          },
+        ));
+  }
+
+  Widget _basicHero() {
+    return Hero(
+      tag: 'imageHero',
+      child: Consumer<CameraImage?>(
+        builder: (context, image, child) {
+          if (image == null) {
+            return Center(child: CircularProgressIndicator());
+          }
+          if (image.data == null) {
+            return HeroMode(
+              enabled: false,
+              child: Center(
+                  child: Card(
+                      color: Colors.black26,
+                      child: Container(
+                          height: 50,
+                          width: 200,
+                          child: Center(
+                              child: Text('No photo available',
+                                  style: TextStyle(color: Colors.white)))))),
+            );
+          }
+          return Image.memory(
+            image.data!,
+            fit: BoxFit.contain,
+            gaplessPlayback: true,
+          );
+        },
+      ),
+    );
   }
 }

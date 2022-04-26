@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:vivarium_control_unit/models/advancedSettings/advancedArguments.dart';
 import 'package:vivarium_control_unit/models/bluetoothDevice/bluetoothDevice.dart';
 import 'package:vivarium_control_unit/models/device/device.dart';
 import 'package:vivarium_control_unit/ui/addDevice/addDevicePage.dart';
@@ -12,9 +13,9 @@ import 'package:vivarium_control_unit/ui/homepage/homePage.dart';
 import 'package:vivarium_control_unit/ui/login/loginPage.dart';
 import 'package:vivarium_control_unit/ui/register/registerPage.dart';
 import 'package:vivarium_control_unit/ui/userSettings/SettingsPage.dart';
+import 'package:vivarium_control_unit/ui/widgets/skeletonPage.dart';
 
 import 'device/devicePageRoot.dart';
-import 'package:vivarium_control_unit/models/advancedSettings/advancedArguments.dart';
 
 class Routes {
   /// Home screen
@@ -55,8 +56,6 @@ class Routes {
 
   /// PID settings
   static const String pidTuning = '/pidTuning';
-
-
 }
 
 Map<String, WidgetBuilder> defaultRoutes() => {
@@ -70,7 +69,7 @@ Map<String, WidgetBuilder> defaultRoutes() => {
 
 class Router {
   static Route<dynamic> generateRoute(RouteSettings settings) {
-    if (settings.name == null){
+    if (settings.name == null) {
       return MaterialPageRoute(
           settings: RouteSettings(name: 'unknown'),
           builder: (_) => defaultPage('unknown'));
@@ -91,20 +90,21 @@ class Router {
               : AddCameraPage(deviceId: settings.arguments as String?),
         );
 
-
       case Routes.addDeviceDialog:
         return MaterialPageRoute(
             settings: RouteSettings(name: Routes.addDeviceDialog),
             builder: (_) => (settings.arguments == null)
                 ? defaultPage(settings.name)
-                : AddDeviceDialog(device: settings.arguments as BluetoothDevice));
+                : AddDeviceDialog(
+                    device: settings.arguments as BluetoothDevice));
 
       case Routes.addCameraDialog:
         return MaterialPageRoute(
             settings: RouteSettings(name: Routes.addCameraDialog),
             builder: (_) => (settings.arguments == null)
                 ? defaultPage(settings.name)
-                : AddCameraDialog(device: settings.arguments as BluetoothDevice));
+                : AddCameraDialog(
+                    device: settings.arguments as BluetoothDevice));
 
       case Routes.device:
         return MaterialPageRoute(
@@ -118,14 +118,18 @@ class Router {
             settings: RouteSettings(name: Routes.deviceSettings),
             builder: (_) => (settings.arguments == null)
                 ? defaultPage(settings.name)
-                : AdvancedSettingsPage(arguments: settings.arguments as AdvancedSettingsPageArguments));
+                : AdvancedSettingsPage(
+                    arguments:
+                        settings.arguments as AdvancedSettingsPageArguments));
 
       case Routes.pidTuning:
         return MaterialPageRoute(
             settings: RouteSettings(name: Routes.deviceSettings),
             builder: (_) => (settings.arguments == null)
                 ? defaultPage(settings.name)
-                : PidTunings(arguments: settings.arguments as AdvancedSettingsPageArguments));
+                : PidTunings(
+                    arguments:
+                        settings.arguments as AdvancedSettingsPageArguments));
 
       default:
         return MaterialPageRoute(
@@ -135,9 +139,14 @@ class Router {
   }
 
   static Widget defaultPage(String? name) {
-    return Scaffold(
+    return SkeletonPage(
       body: Center(
-        child: Text('No route defined for $name'),
+        child: Card(
+            color: Colors.black26,
+            child: Text(
+              'No route defined for $name',
+              style: TextStyle(color: Colors.white),
+            )),
       ),
     );
   }
